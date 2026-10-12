@@ -318,7 +318,7 @@ html[data-theme="dark"] .rp-company-profit .cp-toggle__track::after { background
 
 /* toolbar */
 .rp-users-ratio .ur-toolbar { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.rp-users-ratio .ur-search { display: flex; align-items: center; flex: none; width: 260px; height: 36px; padding: 0 12px; border-radius: 8px; background: var(--surface); transition: box-shadow .15s ease; }
+.rp-users-ratio .ur-search { margin-left: auto; display: flex; align-items: center; flex: none; width: 260px; height: 36px; padding: 0 12px; border-radius: 8px; background: var(--surface); transition: box-shadow .15s ease; }
 .rp-users-ratio .ur-search:focus-within { box-shadow: 0 0 0 1px var(--main) inset; }
 .rp-users-ratio .ur-search input { flex: 1 0 0; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: var(--black); outline: none; -webkit-appearance: none; appearance: none; }
 .rp-users-ratio .ur-search input::placeholder { color: var(--light-black); opacity: 1; }
@@ -330,8 +330,7 @@ html[data-theme="dark"] .rp-company-profit .cp-toggle__track::after { background
 .rp-users-ratio .ur-menu { left: 0; right: auto; width: 100%; min-width: 180px; }
 .rp-users-ratio .ur-seg { flex: none; align-self: center; }
 .rp-users-ratio .ur-seg .tab { font-size: 14px; }
-.rp-users-ratio .ur-sort { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.rp-users-ratio .ur-sort__label { font-size: 14px; color: var(--light-black); white-space: nowrap; }
+.rp-users-ratio .ur-sort { display: flex; align-items: center; gap: 8px; }
 .rp-users-ratio .ur-sort .ur-menu { left: auto; right: 0; }
 .rp-users-ratio .ur-dir { display: grid; place-items: center; flex: none; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 8px; background: var(--surface); cursor: pointer; }
 .rp-users-ratio .ur-dir:hover { box-shadow: 0 0 0 1px var(--soft-gray) inset; }
@@ -358,6 +357,10 @@ html[data-theme="dark"] .rp-users-ratio .ur-empty__icon img { filter: brightness
 @media (max-width: 1280px) {
   .rp-users-ratio .ur-toolbar { flex-wrap: wrap; }
 }
+@media (max-width: 1180px) {
+  .rp-users-ratio .ur-search { margin-left: 0; flex: 1 1 200px; width: auto; }
+  .rp-users-ratio .ur-seg { flex-basis: auto; }
+}
 /* tablet */
 @media (max-width: 1024px) {
   .rp-users-ratio .ur-results { min-height: 420px; }
@@ -369,14 +372,14 @@ html[data-theme="dark"] .rp-users-ratio .ur-empty__icon img { filter: brightness
   .rp-users-ratio .rp-head__actions > * { flex: 1 1 0; }
   .rp-users-ratio .ur-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: none; }
   .rp-users-ratio .ur-toolbar > *, .rp-users-ratio .ur-toolbar .dd, .rp-users-ratio .ur-toolbar .select, .rp-users-ratio .ur-toolbar .tabs { grid-area: auto; }
-  .rp-users-ratio .ur-search, .rp-users-ratio .ur-range { grid-column: 1 / -1; width: auto; }
+  .rp-users-ratio .ur-search, .rp-users-ratio .ur-range, .rp-users-ratio .ur-seg { grid-column: 1 / -1; width: auto; margin-left: 0; }
   .rp-users-ratio .ur-dd { min-width: 0; }
   .rp-users-ratio .ur-select { width: 100%; }
   .rp-users-ratio .ur-select span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rp-users-ratio .ur-seg { display: flex; align-self: stretch; }
-  .rp-users-ratio .ur-seg { min-width: 0; }
+  .rp-users-ratio .ur-toolbar .tabs.ur-seg { grid-column: 1 / -1; min-width: 0; width: 100%; box-sizing: border-box; }
   .rp-users-ratio .ur-seg .tab { flex: 1 1 0; min-width: 0; padding: 0 6px; justify-content: center; }
-  .rp-users-ratio .ur-sort { grid-column: 1 / -1; margin-left: 0; }
+  .rp-users-ratio .ur-sort { min-width: 0; }
   .rp-users-ratio .ur-sort .ur-dd { flex: 1 1 auto; min-width: 0; }
   .rp-users-ratio .ur-results { min-height: 360px; }
 }
@@ -7876,12 +7879,11 @@ html[data-theme="dark"] .table--pay .o-tag--gray { color: #a3aec4; background: r
       </div>
     </div>
     <div class="ur-toolbar">
+      <div class="tabs rp-seg ur-seg" role="tablist" aria-label="Status"><button class="tab" type="button" role="tab" aria-selected="false" data-value="all">All</button><button class="tab is-active" type="button" role="tab" aria-selected="true" data-value="active">Active</button><button class="tab" type="button" role="tab" aria-selected="false" data-value="inactive">Inactive</button></div>
       <label class="ur-search"><input type="search" placeholder="Search user..." aria-label="Search user" autocomplete="off"></label>
       <button class="rp-range ur-range" type="button" aria-haspopup="dialog" aria-expanded="false" data-hm-range-btn><span data-hm-range-long>Sep 01, 2026 – Sep 24, 2026</span><img data-src="assets/icons/calendar.svg" data-o-src width="16" height="16" alt=""></button>
       <div class="dd ur-dd"><button class="select ur-select" type="button" aria-haspopup="listbox" aria-expanded="false" data-dd="users-ratio-team"><span data-dd-label>All Teams</span><img data-src="assets/icons/arrowDown.svg" data-o-src width="16" height="16" alt=""></button><div class="menu menu--select ur-menu" role="listbox" data-menu="users-ratio-team" hidden><button class="menu__item is-selected" type="button" role="option" aria-selected="true" data-value="All Teams"><span class="menu__label">All Teams</span><img data-src="assets/icons/check16.svg" data-o-src width="16" height="16" alt=""></button></div></div>
-      <div class="tabs rp-seg ur-seg" role="tablist" aria-label="Status"><button class="tab" type="button" role="tab" aria-selected="false" data-value="all">All</button><button class="tab is-active" type="button" role="tab" aria-selected="true" data-value="active">Active</button><button class="tab" type="button" role="tab" aria-selected="false" data-value="inactive">Inactive</button></div>
       <div class="ur-sort">
-        <span class="ur-sort__label">Sort</span>
         <div class="dd ur-dd"><button class="select ur-select" type="button" aria-haspopup="listbox" aria-expanded="false" data-dd="users-ratio-sort"><span data-dd-label>Gross profit</span><img data-src="assets/icons/arrowDown.svg" data-o-src width="16" height="16" alt=""></button><div class="menu menu--select ur-menu" role="listbox" data-menu="users-ratio-sort" hidden><button class="menu__item is-selected" type="button" role="option" aria-selected="true" data-value="Gross profit"><span class="menu__label">Gross profit</span><img data-src="assets/icons/check16.svg" data-o-src width="16" height="16" alt=""></button></div></div>
         <button class="ur-dir" type="button" aria-label="Sort direction: descending" aria-pressed="false" data-ur-dir><img data-src="assets/reports/users-ratio/chevronDown.svg" data-o-src width="16" height="16" alt=""></button>
       </div>
