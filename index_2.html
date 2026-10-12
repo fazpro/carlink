@@ -3605,6 +3605,7 @@ html[data-theme] body, html[data-theme] { transition: background-color .25s ease
 .menu__swatch--dark { background: #0f172a; }
 html[data-theme="dark"] .menu__swatch { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
 .dd--theme .icon-btn[aria-expanded="true"] { background: var(--hover); }
+.dd--theme:has(> .menu:not([hidden])) { z-index: 75; }
 
 /* dark: neutral-dark icons flip to light, photos stop multiplying into the dark surface */
 html[data-theme="dark"] img[data-src$="/arrowDown.svg"],
