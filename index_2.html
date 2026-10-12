@@ -11288,7 +11288,7 @@ html[data-theme="dark"] .table--pay .o-tag--gray { color: #a3aec4; background: r
     });
   }
 
-  function chime() {
+  function chime() { return; // muted in the prototype
     try {
       var A = window.AudioContext || window.webkitAudioContext; if (!A) return;
       var ctx = new A(); if (ctx.state === "suspended") { ctx.close(); return; } // browsers allow sound only after a click
