@@ -12745,6 +12745,9 @@ document.addEventListener('click', function (e) {
 .table__grid > .row--head { position: relative; z-index: 6; will-change: transform; }
 .table__grid > .row--head.is-pinned { box-shadow: 0 8px 16px -10px rgba(20, 27, 52, .25); }
 .table__grid > .row--head.is-pinned > .cell { background: var(--surface); }
+
+.is-contact-link { cursor: pointer; }
+.is-contact-link:hover { text-decoration: underline; }
 </style>
 <script>
 /* Carlink — Oct 2026 updates from Figma (rfeWSu6yM2FNM4pQ4GGwTz):
@@ -13039,6 +13042,24 @@ document.addEventListener('click', function (e) {
     render();
   }
 
+
+  /* ---------- 7. Any shipper phone / e-mail (tables, lead and order details) opens Send SMS / Send Email ---------- */
+  var openers = {};
+  ["email", "sms"].forEach(function (n) {
+    var b = document.createElement("button"); b.type = "button"; b.hidden = true; b.setAttribute("data-open", n);
+    document.body.appendChild(b); openers[n] = b;
+  });
+  document.addEventListener("click", function (e) {
+    var v = e.target.closest(".contact-cell__val, .ld-chan__val");
+    if (!v || v.closest("[data-off]") || !v.closest("main, [data-view]")) return;
+    var txt = v.textContent.trim(); if (!txt) return;
+    e.preventDefault(); e.stopPropagation();
+    openers[txt.indexOf("@") > -1 ? "email" : "sms"].click();
+  }, true);
+  $$(".contact-cell__val, .ld-chan__val").forEach(function (v) {
+    v.classList.add("is-contact-link");
+    v.setAttribute("title", v.textContent.indexOf("@") > -1 ? "Send email" : "Send SMS");
+  });
   /* ---------- 6. Table column titles stay visible while the page scrolls ----------
      The tables sit in overflow containers (rounded corners + horizontal scroll), where
      CSS sticky can't reach the page — so the header row is shifted with the scroll instead. */
