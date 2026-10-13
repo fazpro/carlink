@@ -12741,6 +12741,10 @@ document.addEventListener('click', function (e) {
   .sl-card__route { flex-wrap: wrap; row-gap: 4px; }
 }
 @media (max-width: 480px) { .ps-sum { grid-template-columns: 1fr; } }
+/* pinned column titles (see "Table column titles stay visible" in the update script) */
+.table__grid > .row--head { position: relative; z-index: 6; will-change: transform; }
+.table__grid > .row--head.is-pinned { box-shadow: 0 8px 16px -10px rgba(20, 27, 52, .25); }
+.table__grid > .row--head.is-pinned > .cell { background: var(--surface); }
 </style>
 <script>
 /* Carlink — Oct 2026 updates from Figma (rfeWSu6yM2FNM4pQ4GGwTz):
@@ -13034,6 +13038,29 @@ document.addEventListener('click', function (e) {
     onOpen("o-dispatch", function () { st8 = { step: 1, platform: "cd", q: "", carrier: null }; render(); });
     render();
   }
+
+  /* ---------- 6. Table column titles stay visible while the page scrolls ----------
+     The tables sit in overflow containers (rounded corners + horizontal scroll), where
+     CSS sticky can't reach the page — so the header row is shifted with the scroll instead. */
+  var ticking = false;
+  function pinHeads() {
+    ticking = false;
+    $$(".table__grid > .row--head").forEach(function (h) {
+      var grid = h.parentNode;
+      if (!h.offsetParent || h.offsetHeight === 0) { h.style.transform = ""; h.classList.remove("is-pinned"); return; }
+      var g = grid.getBoundingClientRect();
+      var max = Math.max(0, g.height - h.offsetHeight - 56);
+      var y = Math.min(Math.max(0, -g.top), max);
+      h.style.transform = y ? "translateY(" + y + "px)" : "";
+      h.classList.toggle("is-pinned", y > 0);
+    });
+  }
+  function queue() { if (!ticking) { ticking = true; requestAnimationFrame(pinHeads); } }
+  window.addEventListener("scroll", queue, { passive: true });
+  window.addEventListener("resize", queue);
+  window.addEventListener("hashchange", function () { setTimeout(queue, 50); });
+  document.addEventListener("click", function () { setTimeout(queue, 0); });
+  queue();
 })();
 </script>
 </body></html>
