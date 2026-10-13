@@ -9267,6 +9267,25 @@ html[data-theme="dark"] .table--classic .idline > .t:first-child { color: #6ea8f
       <button class="btn-primary" type="button" disabled data-close id="email-send">Send Email</button>
     </div>
   </div>
+  <div class="modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="m-convert-t" data-modal="convert" style="--w:480px" hidden>
+    <div class="modal__head">
+      <div class="modal__titles"><h2 id="m-convert-t" class="modal__h"><span class="modal__title">Convert lead to quote?</span></h2><p class="modal__sub">This moves the lead forward to the Quotes stage. Changing the pipeline stage cannot be undone from here.</p></div>
+      <button class="modal__close" type="button" aria-label="Close" data-close><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxNCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTAuMDkgMy4wOUMxMC4zMiAyLjg2IDEwLjY4IDIuODYgMTAuOTEgMy4wOUMxMS4xNCAzLjMyIDExLjE0IDMuNjggMTAuOTEgMy45MUw3LjgyIDdMMTAuOTEgMTAuMDlMMTAuOTUgMTAuMTNDMTEuMTQgMTAuMzYgMTEuMTMgMTAuNyAxMC45MSAxMC45MUMxMC43IDExLjEzIDEwLjM2IDExLjE0IDEwLjEzIDEwLjk1TDEwLjA5IDEwLjkxTDcgNy44MkwzLjkxIDEwLjkxQzMuNjkgMTEuMTQgMy4zMiAxMS4xNCAzLjA5IDEwLjkxQzIuODYgMTAuNjggMi44NiAxMC4zMSAzLjA5IDEwLjA5TDYuMTcgN0wzLjA5IDMuOTFMMy4wNSAzLjg3QzIuODYgMy42NCAyLjg3IDMuMyAzLjA5IDMuMDlDMy4zIDIuODcgMy42NCAyLjg2IDMuODcgMy4wNUwzLjkxIDMuMDlMNyA2LjE4TDEwLjA5IDMuMDlaIiBmaWxsPSIjMTQxQjM0Ii8+PC9zdmc+" width="14" height="14" alt=""></button>
+    </div>
+    <div class="modal__foot">
+      <button class="btn-secondary" type="button" data-close>Cancel</button>
+      <button class="btn-primary" type="button" data-close data-convert-go>Save &amp; Convert</button>
+    </div>
+  </div>
+  <div class="modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="m-ctype-t" data-modal="ctype" style="--w:480px" hidden>
+    <div class="modal__head">
+      <div class="modal__titles"><h2 id="m-ctype-t" class="modal__h"><span class="modal__title">Customer Type</span></h2><p class="modal__sub">Please select the customer type to continue. This step is required.</p></div>
+    </div>
+    <div class="modal__body ct-opts" style="padding-bottom:20px">
+      <button class="ct-opt" type="button" data-close data-ctype="new"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#005FF9"/><circle cx="10" cy="8" r="3" fill="#fff"/><path d="M4.8 15.5c1.1-2 3-3 5.2-3s4.1 1 5.2 3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>New Customer</button>
+      <button class="ct-opt" type="button" data-close data-ctype="returned"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#005FF9"/><circle cx="10" cy="8" r="3" fill="#fff"/><path d="M4.8 15.5c1.1-2 3-3 5.2-3s4.1 1 5.2 3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>Returned Customer</button>
+    </div>
+  </div>
 
   <div class="modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="m-note-t" data-modal="note" style="--w:450px" hidden>
     <div class="modal__head">
@@ -10129,7 +10148,7 @@ html[data-theme="dark"] .table--classic .idline > .t:first-child { color: #6ea8f
         alertBox.hidden = true;
         nl.classList.add("is-saving");
         $(".nl-save__idle", nl).hidden = true; $(".nl-save__busy", nl).hidden = false;
-        saveTimer = setTimeout(function () { location.hash = nl.dataset.done; }, 1500);
+        saveTimer = setTimeout(function () { if (nl.dataset.view === "lead-new") document.dispatchEvent(new CustomEvent("carlink:lead-saved", { detail: nl.dataset.done })); else location.hash = nl.dataset.done; }, 1500);
         return;
       }
       var seg = e.target.closest(".nl-seg__btn");
@@ -12748,6 +12767,21 @@ document.addEventListener('click', function (e) {
 
 .is-contact-link { cursor: pointer; }
 .is-contact-link:hover { text-decoration: underline; }
+/* ---------- Leads parity ---------- */
+.qv-link { display: inline-block; margin-top: 2px; font-size: 13px; color: var(--main); text-decoration: none; position: relative; z-index: 3; }
+.qv-link:hover { text-decoration: underline; }
+.c-shipper .contact-cell, .oc-shipper .contact-cell { flex-direction: column; align-items: flex-start; }
+.rf-btn { gap: 6px; min-width: 64px; font-variant-numeric: tabular-nums; }
+.rf-btn svg { width: 16px; height: 16px; }
+.rf-btn.is-busy svg { animation: rf-spin .8s linear infinite; }
+@keyframes rf-spin { to { transform: rotate(360deg); } }
+.ct-opts { flex-direction: row; gap: 12px; }
+.ct-opt { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; height: 88px; border: 1px solid var(--soft-gray); border-radius: 10px; background: var(--surface); font: inherit; font-size: 14px; font-weight: 500; color: var(--black); cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
+.ct-opt:hover, .ct-opt:focus-visible { border-color: var(--main); background: var(--selected, rgba(0, 95, 249, .06)); outline: none; }
+.ct-opt svg { width: 20px; height: 20px; }
+.upd-toast--ok { top: 16px; bottom: auto; background: #141b34; }
+.upd-toast svg { width: 16px; height: 16px; flex: none; }
+[data-view="leads"] .page-header { position: relative; z-index: 20; }
 </style>
 <script>
 /* Carlink — Oct 2026 updates from Figma (rfeWSu6yM2FNM4pQ4GGwTz):
@@ -13045,7 +13079,7 @@ document.addEventListener('click', function (e) {
 
   /* ---------- 7. Any shipper phone / e-mail (tables, lead and order details) opens Send SMS / Send Email ---------- */
   var openers = {};
-  ["email", "sms"].forEach(function (n) {
+  ["email", "sms", "ctype"].forEach(function (n) {
     var b = document.createElement("button"); b.type = "button"; b.hidden = true; b.setAttribute("data-open", n);
     document.body.appendChild(b); openers[n] = b;
   });
@@ -13060,6 +13094,74 @@ document.addEventListener('click', function (e) {
     v.classList.add("is-contact-link");
     v.setAttribute("title", v.textContent.indexOf("@") > -1 ? "Send email" : "Send SMS");
   });
+
+  /* ---------- 8. Leads flow parity with the live app (Figma Leads 26 / 31, Lead details 14.13, 14.15–14.16) ---------- */
+  // 8a. Leads "Create new" → New Lead / New Quote / New Order (same menu as Orders)
+  var oMenu = $('[data-menu="o-create"]');
+  $$('[data-view="leads"] a.btn-primary').forEach(function (a) {
+    if (a.textContent.trim() !== "Create new" || !oMenu) return;
+    var dd = document.createElement("div"); dd.className = "dd";
+    var b = document.createElement("button"); b.className = "btn-primary"; b.type = "button";
+    b.setAttribute("aria-haspopup", "menu"); b.setAttribute("aria-expanded", "false"); b.setAttribute("data-dd", "l-create"); b.innerHTML = a.innerHTML;
+    var m = oMenu.cloneNode(true); m.setAttribute("data-menu", "l-create"); m.hidden = true;
+    $$("img[data-src]", m).forEach(function (i) { var u = A[i.getAttribute("data-src")]; if (u) i.src = u; });
+    dd.appendChild(b); dd.appendChild(m); a.parentNode.replaceChild(dd, a);
+  });
+  // 8b. "Quick view" under the shipper opens the record in a new tab (live app)
+  $$(".c-shipper .contact-cell, .oc-shipper .contact-cell").forEach(function (c) {
+    if (c.querySelector(".qv-link") || !c.querySelector(".contact-cell__name")) return;
+    var row = c.closest(".row"); if (!row || row.classList.contains("row--head")) return;
+    var href = row.dataset.oid ? "#order/" + row.dataset.oid : "#lead/6193-CDA";
+    var a = document.createElement("a"); a.className = "qv-link"; a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Quick view";
+    c.querySelector(".contact-cell__name").insertAdjacentElement("afterend", a);
+  });
+  document.addEventListener("click", function (e) { if (e.target.closest(".qv-link")) e.stopPropagation(); }, true);
+  // 8c. Leads list refreshes itself every 30 s (live app timer)
+  $$('[data-view="leads"] button').forEach(function (cb) {
+    if (cb.textContent.trim() !== "Columns" || cb.parentNode.querySelector(".rf-btn")) return;
+    var rf = document.createElement("button"); rf.type = "button"; rf.className = "btn-secondary rf-btn"; rf.setAttribute("aria-label", "Refresh leads");
+    rf.innerHTML = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>30s</span>';
+    cb.parentNode.insertBefore(rf, cb);
+    var left = 30, lbl = rf.querySelector("span");
+    var spin = function () { rf.classList.add("is-busy"); lbl.textContent = "…"; setTimeout(function () { rf.classList.remove("is-busy"); left = 30; lbl.textContent = left + "s"; }, 900); };
+    rf.addEventListener("click", spin);
+    setInterval(function () { if (rf.classList.contains("is-busy") || !rf.offsetParent) return; left--; if (left <= 0) spin(); else lbl.textContent = left + "s"; }, 1000);
+  });
+  // 8d. Convert to quote asks first (Figma 14.13)
+  $$('[data-view="lead"] button').forEach(function (b) {
+    if (b.textContent.trim() !== "Convert to quote") return;
+    b.removeAttribute("data-href"); b.setAttribute("data-open", "convert");
+  });
+  var cv = $('[data-modal="convert"]');
+  if (cv) $("[data-convert-go]", cv).addEventListener("click", function () { setTimeout(function () { location.hash = "quotes/new"; }, 160); });
+  // 8e. Vehicle type list as in the live app (Figma 14.16)
+  var VT = ["ATV", "BOAT", "CAR", "HEAVY EQUIPMENT", "LARGE YACHT", "MOTORCYCLE", "OTHER", "PICKUP", "RV", "SUV", "TRAVEL TRAILER", "VAN"];
+  function fillTypes(root) {
+    $$('.nl select[name="type"]', root).forEach(function (sel) {
+      if (sel.dataset.vt) return; sel.dataset.vt = "1";
+      var ph = sel.options[0] && !sel.options[0].value ? sel.options[0].text : "Select Type";
+      sel.innerHTML = '<option value="">' + ph + "</option>" + VT.map(function (t) { return "<option>" + t + "</option>"; }).join("");
+    });
+  }
+  fillTypes(document);
+  new MutationObserver(function (ms) { ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) fillTypes(n); }); }); }).observe(document.body, { childList: true, subtree: true });
+  // 8f. A saved new lead: toast + Customer type (Figma 14.15), then on to the list
+  document.addEventListener("carlink:lead-saved", function (e) {
+    toastOk("Lead created successfully");
+    var ct = $('[data-modal="ctype"]'); if (!ct) { location.hash = e.detail; return; }
+    ct.dataset.done = e.detail; openers.ctype.click();
+  });
+  var ctm = $('[data-modal="ctype"]');
+  if (ctm) ctm.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-ctype]"); if (!b) return;
+    var done = ctm.dataset.done || "leads"; setTimeout(function () { location.hash = done; }, 160);
+  });
+  function toastOk(t) {
+    var old = $(".upd-toast"); if (old) old.remove();
+    var d = document.createElement("div"); d.className = "upd-toast upd-toast--ok"; d.setAttribute("role", "status");
+    d.innerHTML = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="#0dc268" stroke-width="1.4"/><path d="m5.5 8 1.8 1.8L10.7 6.4" stroke="#0dc268" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' + esc(t);
+    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 3200);
+  }
   /* ---------- 6. Table column titles stay visible while the page scrolls ----------
      The tables sit in overflow containers (rounded corners + horizontal scroll), where
      CSS sticky can't reach the page — so the header row is shifted with the scroll instead. */
