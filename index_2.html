@@ -18520,4 +18520,744 @@ html[data-theme="dark"] .rx-bo .btn-secondary img, html[data-theme="dark"] .rx-d
   });
 })();
 </script>
+<!-- m-home:start -->
+<style>
+/* =====================================================================
+   Carlink — Mobile adaptation · Home flow (Figma 911:53968, 📱 Mobile — Flow)
+   Phone only (≤767px): flat header, bottom tab bar, bottom sheets,
+   full-screen calculator / notifications, card layouts.
+   ===================================================================== */
+.mtab, .msheet, .msheet-bd, .m-only, .m-sb, .gsm, .hm-state__badge, .m-sheet-head, .m-sheet-foot, .m-np-back { display: none; }
+
+@media (max-width: 767px) {
+  /* ---------- Shell: header ---------- */
+  .od-banner { display: none; }
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    height: calc(52px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 16px 0; gap: 8px;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: saturate(1.6) blur(16px); backdrop-filter: saturate(1.6) blur(16px);
+  }
+  .topbar .menu-btn, .topbar .dd--theme { display: none !important; }
+  .topbar .logo { width: 76px; }
+  .topbar .icon-buttons { gap: 0; margin-right: -12px; }
+  .topbar .icon-btn { width: 44px; height: 44px; border-radius: 12px; }
+  .topbar .icon-btn img { width: 20px; height: 20px; }
+  .topbar .icon-btn--account img { width: 28px; height: 28px; }
+  .topbar .search-toggle.is-open { background: none; }
+  .mobile-search { display: none !important; }
+  html.m-route-search .mobile-search:not(.is-off) { display: block !important; padding: 8px 16px 4px; }
+  html.m-route-search .mobile-search .search__filter { display: none; }
+  html.m-route-search .mobile-search .search__field { height: 44px; border-radius: 12px; background: var(--surface); }
+  .body { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
+  html.m-bill-on .body { padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ---------- Shell: bottom tab bar (Mobile / Tab bar) ---------- */
+  .mtab {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: flex; justify-content: space-between; gap: 0;
+    padding: 6px 16px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface); box-shadow: 0 -1px 0 var(--soft-gray);
+  }
+  .mtab__item {
+    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    flex: 1 1 0; min-width: 0; height: 54px; border-radius: 12px;
+    font-size: 12px; line-height: 14px; font-weight: 500; color: var(--light-black);
+    -webkit-tap-highlight-color: transparent; transition: color .15s, transform .2s var(--ease-spring, ease);
+  }
+  .mtab__item:active { transform: scale(.94); }
+  .mtab__ico { position: relative; width: 20px; height: 20px; }
+  .mtab__ico img, .mtab__ico svg { position: absolute; inset: 0; width: 20px; height: 20px; }
+  .mtab__ico img { display: block !important; }
+  .mtab__ico .nav__ico-on { opacity: 0; }
+  .mtab__item.is-active { color: var(--main); }
+  .mtab__item.is-active .nav__ico-on { opacity: 1; }
+  .mtab__item.is-active .nav__ico-off { opacity: 0; }
+  .mtab__badge {
+    position: absolute; top: -7px; left: 11px; min-width: 20px; height: 16px; padding: 0 5px; border-radius: 100px;
+    background: #e64141; color: #fff; font-size: 10px; line-height: 16px; font-weight: 600; text-align: center;
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+  .mtab__badge:empty { display: none; }
+
+  /* ---------- Shell: billing banner sits above the tab bar ---------- */
+  .oh-bill {
+    position: fixed; left: 0; right: 0; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); z-index: 45;
+    display: grid; grid-template-columns: 20px minmax(0, 1fr) 24px; align-items: start; gap: 8px 10px;
+    padding: 14px 16px; animation: m-up .3s var(--ease-out-expo, ease);
+  }
+  .oh-bill__ic { margin-top: 1px; }
+  .oh-bill__t { grid-column: 2; font-size: 14px; line-height: 19px; }
+  .oh-bill__x { grid-column: 3; grid-row: 1; order: 0; }
+  .oh-bill__btn { grid-column: 2; grid-row: 2; order: 0; justify-self: start; height: 32px; margin: 4px 0 0; padding: 0 14px; border-radius: 6px; font-size: 14px; }
+
+  /* ---------- Sheets ---------- */
+  .msheet-bd { position: fixed; inset: 0; z-index: 74; background: rgba(15, 23, 42, .4); animation: fade .2s ease; }
+  .msheet-bd.is-on { display: block; }
+  .msheet-bd.is-top { z-index: 79; }
+  html.m-lock, html.m-lock body { overflow: hidden; }
+  .msheet, .hm-pop {
+    position: fixed !important; left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+    width: 100% !important; max-width: none !important; max-height: calc(100dvh - 48px); overflow-y: auto; overscroll-behavior: contain;
+    z-index: 75; border: 0 !important; border-radius: 20px 20px 0 0 !important;
+    background: var(--surface); box-shadow: 0 -8px 32px -12px rgba(16, 24, 40, .25) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform-origin: bottom; animation: m-up .32s var(--ease-out-expo, ease) !important;
+  }
+  .hm-pop.is-leaving, .msheet.is-leaving { animation: m-down .2s ease-in forwards !important; }
+  .msheet { z-index: 76; }
+  .msheet.is-top { z-index: 80; }
+  .msheet:not([hidden]) { display: flex; flex-direction: column; }
+  .msheet::before, .hm-pop::before { content: ""; display: block; flex: none; width: 36px; height: 4px; margin: 8px auto 0; border-radius: 4px; background: var(--soft-gray); }
+  .m-sheet-head { display: flex; align-items: center; gap: 12px; padding: 12px 16px 4px; }
+  .m-sheet-head h2 { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 18px; line-height: 22px; font-weight: 500; color: var(--black); }
+  .m-x { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--bg); color: var(--black); }
+  .m-x:active { transform: scale(.94); }
+  .m-x svg { width: 16px; height: 16px; }
+  .m-sheet-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 16px; }
+  .m-btn { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 16px; border-radius: 12px; background: var(--main); color: #fff; font-size: 15px; font-weight: 500; transition: transform .2s var(--ease-spring, ease), background .2s; }
+  .m-btn:active { transform: scale(.97); }
+  .m-btn--sec { background: var(--soft-gray); color: var(--black); }
+  .m-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .m-chip { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 100px; background: var(--bg); color: var(--black); font-size: 14px; white-space: nowrap; transition: background .15s, color .15s, box-shadow .15s; }
+  .m-chip.is-on { background: var(--main-12); color: var(--main); box-shadow: inset 0 0 0 1px var(--main); font-weight: 500; }
+  .m-search { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 12px; background: var(--bg); }
+  .m-search svg { flex: none; width: 18px; height: 18px; color: var(--light-black); }
+  .m-search input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0; background: none; font: inherit; font-size: 16px; color: var(--black); outline: none; }
+  .m-search input::placeholder { color: var(--light-black); }
+
+  /* date range sheet (02 · Date range picker) */
+  .hm-dp { flex-direction: column; }
+  .hm-dp:not([hidden]) { display: flex; }
+  .hm-dp .m-sheet-head { display: flex; }
+  .hm-dp__presets { flex-direction: row; flex-wrap: wrap; gap: 8px; width: auto; padding: 12px 16px 4px; border: 0 !important; }
+  .hm-dp__label { display: none; }
+  .hm-dp__presets button { height: 40px; padding: 0 12px; border-radius: 100px; background: var(--bg); font-size: 14px; }
+  .hm-dp__presets button:hover { transform: none; }
+  .hm-dp__cal { gap: 12px; padding: 12px 16px 0; }
+  .hm-dp__input { height: 48px; border-radius: 12px; font-size: 15px; }
+  .hm-dp__months { gap: 0; }
+  .hm-dp__month { width: 100%; gap: 4px; }
+  .hm-dp__month + .hm-dp__month { display: none; }
+  .hm-dp__mhead { height: 40px; margin-bottom: 4px; }
+  .hm-dp__mhead b { font-size: 18px; }
+  .hm-dp__nav, .hm-dp__sp { width: 40px; height: 40px; border-radius: 10px; }
+  .hm-dp__grid { grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 2px; }
+  .hm-dp__grid > span { height: 36px; font-size: 15px; }
+  .hm-dp__day { height: 46px; font-size: 16px; border-radius: 10px; }
+  .hm-dp__foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 0 16px; }
+  .hm-dp__foot .hm-btn { height: 48px; border-radius: 12px; font-size: 15px; }
+
+  /* search sheet (04 v2 · Search scope) */
+  .hm-scope { padding-top: 0 !important; }
+  .hm-scope .m-sheet-head { display: flex; }
+  .hm-scope__h, .hm-scope__foot, .hm-scope .hm-cb { display: none !important; }
+  .hm-scope .m-sb { padding: 12px 16px 4px; }
+  .hm-scope__opts { flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 12px 16px 0; }
+  .hm-scope__fields { display: contents; }
+  .hm-scope__opt { height: 40px; padding: 0 16px; border-radius: 100px; background: var(--bg); font-size: 14px; animation: none !important; opacity: 1 !important; }
+  .hm-scope__opt.is-on, .hm-scope__opt[data-scope="smart"].is-on { background: var(--main-12); color: var(--main); box-shadow: inset 0 0 0 1px var(--main); font-weight: 500; }
+  .hm-scope .m-sheet-foot { display: grid; }
+
+  /* profile menu sheet */
+  .hm-pmenu { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
+  .hm-pmenu__user { padding: 16px; }
+  .hm-pmenu__items { padding: 8px; }
+  .hm-pmenu__item { height: 48px; font-size: 15px; border-radius: 12px; }
+
+  /* agent sheet (03 v2 · Agent filter) */
+  .m-sb { display: block; }
+  .m-agent .m-sb { padding: 12px 16px 4px; }
+  .m-agent .m-chips { padding: 12px 16px 0; }
+  .m-agent .m-chips + .m-chips { padding-top: 8px; }
+  .m-agent .m-empty { padding: 16px; font-size: 14px; color: var(--light-black); }
+
+  /* more sheet */
+  .m-more__list { display: flex; flex-direction: column; gap: 4px; padding: 8px 8px 16px; }
+  .m-more__item { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 12px; border-radius: 12px; font-size: 15px; color: var(--black); text-align: left; }
+  .m-more__item:active { background: var(--bg); }
+  .m-more__item.is-active { background: var(--main-12); color: var(--main); font-weight: 500; }
+  .m-more__item .nav__ico-on { display: none !important; }
+  .m-more__item.is-active .nav__ico-on { display: block !important; }
+  .m-more__item.is-active .nav__ico-off { display: none !important; }
+  .m-more__item img, .m-more__item svg { width: 20px; height: 20px; flex: none; }
+  .m-more__sep { height: 1px; margin: 4px 12px; background: var(--soft-gray); }
+
+  /* edit goal (06 · Edit goal) → bottom sheet */
+  .modal.hm-modal[data-modal="hm-goal"] {
+    top: auto; bottom: 0; left: 0; transform: none; width: 100%; max-height: calc(100dvh - 48px);
+    gap: 16px; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); border-radius: 20px 20px 0 0;
+    animation: m-up .32s var(--ease-out-expo, ease);
+  }
+  .modal.hm-modal[data-modal="hm-goal"]::before { content: ""; display: block; flex: none; width: 36px; height: 4px; margin: -4px auto 0; border-radius: 4px; background: var(--soft-gray); }
+  .modal.hm-modal[data-modal="hm-goal"] .hm-modal__h { font-size: 18px; }
+  .modal.hm-modal[data-modal="hm-goal"] .hm-iconbtn { width: 44px; height: 44px; border-radius: 12px; }
+  .modal.hm-modal[data-modal="hm-goal"] .hm-input { height: 48px; border-radius: 12px; font-size: 16px; }
+  .modal.hm-modal[data-modal="hm-goal"] .hm-modal__foot { display: grid; grid-template-columns: 1fr 1fr; }
+  .modal.hm-modal[data-modal="hm-goal"] .hm-btn { height: 48px; border-radius: 12px; font-size: 15px; }
+
+  /* ---------- Pricing calculator (10 · 10.1 · 10.2–10.4) → full screen ---------- */
+  .modal.hm-calc {
+    inset: 0; top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: none;
+    gap: 16px; padding: 0; border-radius: 0; animation: m-up .32s var(--ease-out-expo, ease);
+  }
+  .hm-calc .hm-modal__head {
+    position: sticky; top: 0; z-index: 3; gap: 8px;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; background: var(--surface); box-shadow: 0 1px 0 var(--soft-gray);
+  }
+  .hm-calc .hm-modal__h--20 { font-size: 18px; }
+  .hm-calc .hm-iconbtn[aria-label="Minimize"] { display: none; }
+  .hm-calc .hm-iconbtn { width: 44px; height: 44px; border-radius: 12px; }
+  .hm-calc__form { display: contents; }
+  .hm-calc .hm-sec { margin: 0 16px; }
+  .hm-calc .hm-sec__row, .hm-calc .hm-sec__opts { flex-direction: column; }
+  .hm-calc .hm-sec__row + .hm-sec__row { margin-top: 0; }
+  .hm-calc .hm-sec__opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .hm-calc .hm-input, .hm-calc .hm-sel select { height: 48px; border-radius: 12px; font-size: 16px; }
+  .hm-calc .hm-sel { cursor: pointer; }
+  .hm-calc .hm-sel select { pointer-events: none; }
+  .hm-calc__actions {
+    order: 10; position: sticky; bottom: 0; z-index: 3; margin-top: auto;
+    padding: 13px 16px calc(13px + env(safe-area-inset-bottom, 0px)); background: var(--surface); box-shadow: 0 -1px 0 var(--soft-gray);
+  }
+  .hm-calc__actions .hm-btn { width: 100%; height: 48px; border-radius: 12px; font-size: 15px; }
+  .hm-calc__cd { order: 5; margin: 0 16px 16px; gap: 12px; }
+  .hm-calc .hm-ptab { overflow-x: auto; }
+  .hm-calc .hm-sum__row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hm-calc .hm-sum { gap: 12px; }
+  .hm-calc .hm-sum__row + .hm-sum__row { margin-top: 0; }
+  .hm-calc .hm-sum__v { white-space: normal; }
+  /* results: preview rows as cards (10.1) */
+  .hm-calc .hm-ptab:has(.hm-ptab__rows:not([hidden])) { overflow: visible; border: 0; border-radius: 0; }
+  .hm-calc .hm-ptab:has(.hm-ptab__rows:not([hidden])) .hm-ptab__groups,
+  .hm-calc .hm-ptab:has(.hm-ptab__rows:not([hidden])) .hm-ptab__cols { display: none; }
+  .hm-calc .hm-ptab__rows:not([hidden]) { display: flex; flex-direction: column; gap: 12px; min-width: 0 !important; }
+  .hm-calc .hm-ptab__rows::before { content: "Free & Premium plan preview"; font-size: 13px; color: var(--light-black); }
+  .hm-calc .hm-ptab__row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: auto; column-gap: 0; row-gap: 0;
+    padding: 12px; border: 1px solid var(--soft-gray); border-radius: 12px;
+  }
+  .hm-calc .hm-ptab__row > span { padding: 0; align-items: flex-start !important; justify-content: flex-start !important; text-align: left; }
+  .hm-calc .hm-ptab__row > span[data-l] { flex-direction: column; gap: 2px; padding: 10px 8px 0 0; }
+  .hm-calc .hm-ptab__row > span[data-l]::before { content: attr(data-l); font-size: 12px; line-height: 15px; font-weight: 400; color: var(--light-black); }
+  .hm-calc .hm-ptab__row > :nth-child(1) { grid-column: 3; grid-row: 1; justify-content: flex-end !important; text-align: right; font-weight: 500; padding-top: 4px; }
+  .hm-calc .hm-ptab__row > :nth-child(2) { grid-column: 1 / 3; grid-row: 1; padding: 0 !important; }
+  .hm-calc .hm-ptab__row > :nth-child(n+6) { grid-row: 3; margin-top: 10px; padding: 10px 8px 10px 0; background: var(--orange-12); }
+  .hm-calc .hm-ptab__row > :nth-child(6) { padding-left: 10px; border-radius: 8px 0 0 8px; }
+  .hm-calc .hm-ptab__row > :nth-child(8) { border-radius: 0 8px 8px 0; }
+  .hm-calc .hm-ptab__row .hm-ptab__price { align-items: flex-start !important; }
+  .hm-calc .hm-ptab__row .is-prem { box-shadow: none; }
+
+  /* option sheets (10.2 Trailer type · 10.3 Inop · 10.4 Vehicle type) */
+  .m-opts { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 8px; padding: 12px 16px 16px; }
+  .m-opt { display: flex; align-items: center; justify-content: center; gap: 6px; height: 52px; padding: 0 8px; border-radius: 12px; background: var(--bg); color: var(--black); font-size: 15px; text-align: center; }
+  .m-opt svg { width: 18px; height: 18px; flex: none; }
+  .m-opt.is-on { background: var(--main-12); color: var(--main); box-shadow: inset 0 0 0 1px var(--main); }
+
+  /* ---------- Notifications → full screen page ---------- */
+  .notif-panel {
+    position: fixed !important; inset: 0 !important; z-index: 90; width: 100% !important; max-width: none !important;
+    display: flex; flex-direction: column; border-radius: 0; box-shadow: none; animation: m-in-r .28s var(--ease-out-expo, ease);
+  }
+  .notif-panel[hidden] { display: none; }
+  .notif-panel__head, .oh-np .notif-panel__head {
+    position: relative; justify-content: center; min-height: 56px; padding: calc(6px + env(safe-area-inset-top, 0px)) 16px 6px; border-bottom: 0;
+    font-size: 17px; font-weight: 500;
+  }
+  .oh-np .notif-panel__head > span:first-child { flex: none; }
+  .notif-panel__head .notif-panel__read, .oh-np__refresh, .oh-np__foot { display: none !important; }
+  .m-np-back { display: grid; place-items: center; position: absolute; left: 16px; top: calc(6px + env(safe-area-inset-top, 0px)); width: 44px; height: 44px; border-radius: 50%; background: var(--bg); color: var(--black); }
+  .m-np-back svg { width: 18px; height: 18px; }
+  .oh-np__scroll, .notif-panel__list { flex: 1 1 auto; max-height: none !important; overflow-y: auto; }
+  .oh-np__scroll { padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .notif-panel .notif-item, .oh-nh__it {
+    margin-bottom: 8px; padding: 14px; border: 0 !important; border-radius: 14px; background: var(--bg);
+  }
+  .notif-panel .notif-item.is-unread { background: var(--bg); }
+  .notif-panel .notif-item.is-unread::after { background: #e64141; top: 20px; }
+  .oh-nh__ic, .notif-item__ico { width: 36px; height: 36px; border-radius: 50%; }
+  .oh-nh__badge, .oh-nh__open { display: none; }
+  .oh-nh__title, .notif-item__title { font-size: 15px; }
+  .oh-nh__msg { font-size: 14px; line-height: 19px; }
+  .notif-panel__empty { margin: auto 0; }
+
+  /* ---------- Home dashboard (01 · 01.1) ---------- */
+  .hm { gap: 12px; padding-top: 8px; }
+  .hm-head { gap: 12px; }
+  .hm-head__title { font-size: 20px; line-height: 24px; }
+  .hm-head__actions { display: flex; flex-wrap: nowrap; gap: 8px; width: 100%; }
+  .hm-pop-anchor { flex: 1 1 auto; min-width: 0; }
+  .hm-range { width: 100%; height: 42px; padding: 0 6px 0 9px; gap: 5px; border-radius: 10px; font-size: 13px; }
+  .hm-range span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .hm-agent { flex: 0 0 128px; min-width: 0; }
+  .hm-agent__btn { width: 100%; height: 42px; padding: 0 12px; border-radius: 10px; justify-content: space-between; gap: 6px; font-size: 13px; color: var(--light-black); }
+  .hm-agent__btn [data-dd-label] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hm-agent__menu { display: none !important; }
+  .hm-kpi { height: 108px; }
+  .hm-card { padding: 16px; }
+  .hm-perf .hm-card__head { flex-wrap: wrap; row-gap: 0; }
+  .hm-perf .hm-card__head::after { content: ""; order: 2; flex-basis: 100%; height: 0; }
+  .hm-perf .hm-card__title { flex: 1 1 auto; flex-basis: auto; }
+  .hm-perf .hm-chip { order: 3; margin-top: 16px; height: 36px; padding: 0 12px; font-size: 14px; }
+  .hm-perf__sum { row-gap: 16px; }
+  .hm-mini { flex: 1 0 100%; gap: 24px; }
+  .hm-videos { display: none !important; }
+  .hm-others li { display: grid; grid-template-columns: 14px 32px minmax(0, 1fr) auto; grid-template-areas: "n a name amt" "n a units amt"; column-gap: 12px; row-gap: 2px; padding: 12px; }
+  .hm-others__n { grid-area: n; }
+  .hm-others .hm-ava--sm { grid-area: a; width: 32px; height: 32px; }
+  .hm-others__name { grid-area: name; font-size: 15px; }
+  .hm-others .hm-muted { grid-area: units; font-size: 13px; }
+  .hm-others b { grid-area: amt; width: auto; font-size: 15px; }
+  /* hotspots: ranked states with a coloured state badge */
+  .hm-states { gap: 16px; }
+  .hm-states__h { display: flex; justify-content: space-between; }
+  .hm-states__h::after { content: "Shipments"; }
+  .hm-state { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-areas: "badge name n" "badge bar n"; align-items: center; column-gap: 12px; row-gap: 8px; }
+  .hm-state__badge { grid-area: badge; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 8px; font-size: 14px; font-weight: 600; background: rgba(0, 95, 249, .2); color: var(--main); }
+  .hm-state__badge.l2 { background: rgba(0, 95, 249, .45); color: #fff; }
+  .hm-state__badge.l3 { background: rgba(0, 95, 249, .75); color: #fff; }
+  .hm-state__badge.l4 { background: var(--main); color: #fff; }
+  .hm-state__top { display: contents; }
+  .hm-state__top span { grid-area: name; font-size: 15px; }
+  .hm-state__top b { grid-area: n; font-size: 17px; font-weight: 500; }
+  .hm-state .hm-track { grid-area: bar; }
+  /* top carriers: list without the table head */
+  .hm-carriers .hm-ctable, .hm-carriers .hm-ctable__body { flex: none; max-height: none; overflow: visible; }
+  .hm-ctable__head { display: none; }
+  .hm-crow { grid-template-columns: 24px minmax(0, 1fr) auto; grid-template-areas: "r co paid" "r co n"; row-gap: 2px; column-gap: 12px; padding: 12px 0; border-radius: 0; }
+  .hm-crow > span:first-child { grid-area: r; }
+  .hm-crow__co { grid-area: co; }
+  .hm-crow__co b { font-size: 15px; }
+  .hm-crow__co span { font-size: 13px; }
+  .hm-crow__paid { grid-area: paid; font-size: 16px; }
+  .hm-crow__n { grid-area: n; font-size: 12px; color: var(--light-black); }
+  .hm-crow__n::after { content: " orders"; }
+  .hm-crow__n.is-one::after { content: " order"; }
+  .hm-crow:hover { background: none; }
+
+  /* ---------- Global search results (09) ---------- */
+  .gs .page-header { padding-top: 4px; }
+  .gs .summary { padding: 0; background: none; }
+  .gs-table { background: none; }
+  .gs-table .row--head { display: none !important; }
+  .gs-table .table__scroll { overflow: visible; }
+  .gs-table .table__grid { gap: 12px; min-width: 0 !important; background: none; }
+  .gs-table .gs-row { display: block !important; padding: 0 !important; border: 0 !important; background: none !important; }
+  .gs-table .gs-row[hidden] { display: none !important; }
+  .gs-table .gs-row > .cell { display: none !important; }
+  .gsm { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 16px; background: var(--surface); }
+  .gsm__top { display: flex; align-items: center; gap: 8px; }
+  .gsm__id { font-size: 15px; font-weight: 500; color: var(--main); }
+  .gsm__date { margin-left: auto; font-size: 13px; color: var(--light-black); }
+  .gsm__veh { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .gsm__vt { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .gsm__vt b { font-size: 15px; font-weight: 500; color: var(--black); }
+  .gsm__sub { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--light-black); }
+  .gsm__sub .idprov { font-size: 13px; }
+  .gsm__veh img { flex: none; width: 64px; height: 42px; object-fit: contain; }
+  .gsm__box { display: flex; flex-direction: column; gap: 4px; border-radius: 12px; background: var(--bg); }
+  .gsm__box .route { padding: 10px 12px 0; }
+  .gsm__notes { display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; align-items: center; height: 44px; }
+  .gsm__notes > i { width: 1px; height: 24px; background: var(--soft-gray); }
+  .gsm__notes > * { justify-self: center; }
+  .gsm__notes .add-note { width: 44px; height: 44px; display: grid; place-items: center; }
+  .gsm__contact { display: flex; flex-direction: column; gap: 8px; }
+  .gsm__contact > b { font-size: 15px; font-weight: 500; color: var(--black); }
+  .gsm__contact .contact-cell__line { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: center; gap: 6px; }
+  .gsm__carrier { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--light-black); }
+  .gsm__carrier > :last-child { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 8px; min-width: 0; text-align: right; color: var(--black); }
+  .gsm__prices { display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; align-items: center; padding: 10px 0; border-radius: 12px; background: var(--bg); }
+  .gsm__prices > i { width: 1px; height: 24px; background: var(--soft-gray); }
+  .gsm__prices > span { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 12px; color: var(--light-black); }
+  .gsm__prices b { font-size: 15px; font-weight: 600; color: var(--black); }
+  .gs .pager, .gs .pagination, .gs-table .table__foot { padding-left: 0; padding-right: 0; }
+}
+
+html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
+@keyframes m-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes m-down { to { transform: translateY(100%); } }
+@keyframes m-in-r { from { transform: translateX(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .msheet, .hm-pop, .oh-bill, .notif-panel, .modal.hm-calc, .modal.hm-modal[data-modal="hm-goal"] { animation: none !important; }
+}
+</style>
+<script>
+/* Carlink — Mobile adaptation · Home flow (Figma 911:53968). Phone only (≤767px). */
+(function () {
+  "use strict";
+  var mq = window.matchMedia("(max-width: 767px)");
+  var isM = function () { return mq.matches; };
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var root = document.documentElement;
+  var ICON = {
+    x: '<svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    back: '<svg viewBox="0 0 18 18" fill="none"><path d="M15 9H3m0 0l5-5M3 9l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    search: '<svg viewBox="0 0 18 18" fill="none"><circle cx="8.25" cy="8.25" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M12.75 12.75l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    more: '<svg viewBox="0 0 20 20" fill="none"><circle cx="4" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="16" cy="10" r="1.6" fill="currentColor"/></svg>',
+    check: '<svg viewBox="0 0 18 18" fill="none"><path d="M4 9.5l3.2 3.2L14 5.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    old: '<svg viewBox="0 0 20 20" fill="none"><path d="M8 6L4 10l4 4M4.5 10H13a3 3 0 010 6h-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function closeX(label) { var b = el("button", "m-x", ICON.x); b.type = "button"; b.setAttribute("aria-label", label || "Close"); return b; }
+  function sheetHead(title, onClose) {
+    var h = el("div", "m-sheet-head", "<h2>" + esc(title) + "</h2>");
+    var x = closeX(); x.addEventListener("click", onClose); h.appendChild(x);
+    return h;
+  }
+  function escClose() { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); }
+
+  /* ---------- backdrop + scroll lock for every sheet ---------- */
+  var bd = el("div", "msheet-bd"); bd.setAttribute("aria-hidden", "true");
+  document.body.appendChild(bd);
+  var open = []; // custom sheets
+  function anyPop() { return $$(".hm-pop").some(function (p) { return !p.hidden; }); }
+  function syncBd() {
+    var on = isM() && (anyPop() || open.length > 0);
+    bd.classList.toggle("is-on", on);
+    bd.classList.toggle("is-top", open.some(function (s) { return s.classList.contains("is-top"); }));
+    root.classList.toggle("m-lock", on);
+  }
+  bd.addEventListener("click", function () {
+    if (open.length) closeSheet(open[open.length - 1]); else escClose();
+  });
+  var popObs = new MutationObserver(syncBd);
+  $$(".hm-pop").forEach(function (p) { popObs.observe(p, { attributes: true, attributeFilter: ["hidden"] }); });
+
+  function openSheet(s) {
+    if (open.indexOf(s) > -1) return;
+    s.hidden = false; s.classList.remove("is-leaving"); open.push(s); syncBd();
+    var f = $("input", s); if (f && s.dataset.autofocus) setTimeout(function () { f.focus(); }, 260);
+  }
+  function closeSheet(s) {
+    var i = open.indexOf(s); if (i < 0) return;
+    open.splice(i, 1);
+    s.classList.add("is-leaving");
+    setTimeout(function () { s.hidden = true; s.classList.remove("is-leaving"); syncBd(); }, 190);
+    syncBd();
+  }
+  function makeSheet(cls, title, label) {
+    var s = el("div", "msheet " + (cls || "")); s.hidden = true;
+    s.setAttribute("role", "dialog"); s.setAttribute("aria-modal", "true"); s.setAttribute("aria-label", label || title);
+    s.appendChild(sheetHead(title, function () { closeSheet(s); }));
+    document.body.appendChild(s);
+    return s;
+  }
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && open.length) closeSheet(open[open.length - 1]); });
+  window.addEventListener("hashchange", function () { open.slice().forEach(closeSheet); });
+
+  /* ---------- route helpers ---------- */
+  function hashBase() { return (location.hash.replace(/^#\/?/, "").split("/")[0] || "quotes").toLowerCase(); }
+  var SECTION = { lead: "leads", leads: "leads", quote: "quotes", quotes: "quotes", order: "orders", orders: "orders", home: "home",
+    payments: "payments", payment: "payments", reports: "reports", carriers: "carriers", carrier: "carriers" };
+  function section() {
+    var b = hashBase();
+    if (SECTION[b]) return SECTION[b];
+    if (/^report/.test(b)) return "reports";
+    var act = $(".topbar .nav__item.is-active");
+    return act ? act.dataset.nav : "";
+  }
+
+  /* ---------- bottom tab bar ---------- */
+  var tab = el("nav", "mtab"); tab.setAttribute("aria-label", "Main");
+  var TABS = ["home", "leads", "quotes", "orders"];
+  function navIcons(name) {
+    var src = $('.topbar .nav__item[data-nav="' + name + '"]');
+    var box = el("span", "mtab__ico");
+    if (src) $$("img", src).forEach(function (i) { var c = i.cloneNode(true); c.removeAttribute("width"); c.removeAttribute("height"); box.appendChild(c); });
+    return box;
+  }
+  TABS.forEach(function (n) {
+    var b = el("button", "mtab__item"); b.type = "button"; b.dataset.mtab = n;
+    b.appendChild(navIcons(n));
+    b.appendChild(el("span", "mtab__label", n.charAt(0).toUpperCase() + n.slice(1)));
+    if (n === "leads") { var bad = el("span", "mtab__badge"); bad.dataset.mbadge = ""; $(".mtab__ico", b).appendChild(bad); }
+    b.addEventListener("click", function () { if (hashBase() !== n) location.hash = n; else window.scrollTo({ top: 0, behavior: "smooth" }); });
+    tab.appendChild(b);
+  });
+  var moreB = el("button", "mtab__item", '<span class="mtab__ico">' + ICON.more + '</span><span class="mtab__label">More</span>');
+  moreB.type = "button"; moreB.dataset.mtab = "more"; moreB.setAttribute("aria-haspopup", "dialog");
+  tab.appendChild(moreB);
+  document.body.appendChild(tab);
+
+  // the Leads badge mirrors the live counter in the main nav
+  var srcBadge = $('.topbar .nav__item[data-nav="leads"] .badge');
+  function syncBadge() { var t = srcBadge ? srcBadge.textContent.trim() : ""; $("[data-mbadge]", tab).textContent = t === "0" ? "" : t; }
+  if (srcBadge) new MutationObserver(syncBadge).observe(srcBadge, { childList: true, characterData: true, subtree: true });
+  syncBadge();
+
+  /* More: the remaining sections + the old-design switch */
+  var more = makeSheet("m-more", "More");
+  var list = el("div", "m-more__list");
+  ["payments", "reports", "carriers"].forEach(function (n) {
+    var src = $('.topbar .nav__item[data-nav="' + n + '"]');
+    var b = el("button", "m-more__item"); b.type = "button"; b.dataset.mmore = n;
+    if (src) $$("img", src).forEach(function (i) { b.appendChild(i.cloneNode(true)); });
+    b.appendChild(document.createTextNode(n.charAt(0).toUpperCase() + n.slice(1)));
+    b.addEventListener("click", function () { closeSheet(more); location.hash = n; });
+    list.appendChild(b);
+  });
+  var oldA = $(".od-banner [data-old-design]");
+  if (oldA) {
+    list.appendChild(el("div", "m-more__sep"));
+    var ob = el("button", "m-more__item", ICON.old + "Switch to old design"); ob.type = "button";
+    ob.addEventListener("click", function () { closeSheet(more); oldA.click(); });
+    list.appendChild(ob);
+  }
+  more.appendChild(list);
+  moreB.addEventListener("click", function () { if (more.hidden) openSheet(more); else closeSheet(more); });
+
+  function syncRoute() {
+    var s = section();
+    $$(".mtab__item", tab).forEach(function (b) {
+      var on = b.dataset.mtab === s || (b.dataset.mtab === "more" && ["payments", "reports", "carriers"].indexOf(s) > -1);
+      b.classList.toggle("is-active", on);
+      if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    $$(".m-more__item[data-mmore]", more).forEach(function (b) { b.classList.toggle("is-active", b.dataset.mmore === s); });
+    root.classList.toggle("m-route-search", hashBase() === "search");
+  }
+  window.addEventListener("hashchange", function () { setTimeout(syncRoute, 0); });
+  syncRoute();
+
+  /* ---------- billing banner above the tab bar ---------- */
+  var bill = $(".oh-bill");
+  function syncBill() { root.classList.toggle("m-bill-on", !!bill && !bill.hidden); }
+  if (bill) new MutationObserver(syncBill).observe(bill, { attributes: true, attributeFilter: ["hidden"] });
+  syncBill();
+
+  /* ---------- date range sheet ---------- */
+  var dp = $("[data-hm-dp]");
+  if (dp) {
+    dp.insertBefore(sheetHead("Select date range", escClose), dp.firstChild);
+    var months = $("[data-dp-months]", dp);
+    // one month on a phone: the "next" arrow lives in the hidden second month — bring it over
+    var fixNav = function () {
+      if (!isM()) return;
+      var m = $$(".hm-dp__month", months);
+      if (m.length < 2) return;
+      var next = $('[data-dp-nav="1"]', m[1]), sp = $(".hm-dp__mhead .hm-dp__sp", m[0]);
+      if (next && sp) sp.replaceWith(next);
+    };
+    new MutationObserver(fixNav).observe(months, { childList: true });
+    fixNav();
+  }
+
+  /* ---------- search sheet (scope + query) ---------- */
+  var scope = $("[data-hm-scope]");
+  var mInput = $("#search-mobile");
+  if (scope) {
+    scope.insertBefore(sheetHead("Search", escClose), scope.firstChild);
+    var sb = el("div", "m-sb", '<label class="m-search">' + ICON.search + '<input type="search" placeholder="Search" autocomplete="off" enterkeyhint="search" aria-label="Search"></label>');
+    scope.insertBefore(sb, scope.children[1]);
+    var q = $("input", sb);
+    var foot = el("div", "m-sheet-foot", '<button class="m-btn m-btn--sec" type="button" data-m-clear>Clear</button><button class="m-btn" type="button" data-m-done>Done</button>');
+    scope.appendChild(foot);
+    var go = function () {
+      var v = q.value.trim();
+      escClose();
+      if (!v || !mInput) return;
+      mInput.value = v;
+      mInput.dispatchEvent(new Event("input", { bubbles: true }));
+      mInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    };
+    $("[data-m-done]", foot).addEventListener("click", go);
+    q.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); go(); } });
+    $("[data-m-clear]", foot).addEventListener("click", function () { q.value = ""; var c = $("[data-scope-clear]", scope); if (c) c.click(); q.focus(); });
+    // the header search icon opens this sheet on a phone
+    var toggle = $("[data-search-toggle]");
+    if (toggle) toggle.addEventListener("click", function (e) {
+      if (!isM()) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (!scope.hidden) { escClose(); return; }
+      q.value = mInput && hashBase() === "search" ? mInput.value : "";
+      var f = $(".topbar .search .search__filter");
+      if (f) f.click();
+    }, true);
+  }
+
+  /* ---------- agent filter sheet ---------- */
+  var agentBtn = $('[data-dd="hm-agent"]'), agentMenu = $('[data-menu="hm-agent"]');
+  if (agentBtn && agentMenu) {
+    var ag = makeSheet("m-agent", "Sales agent");
+    var agSearch = el("div", "m-sb", '<label class="m-search">' + ICON.search + '<input type="search" placeholder="Search agent" autocomplete="off" aria-label="Search agent"></label>');
+    ag.appendChild(agSearch);
+    var groups = [[], []], g = 0;
+    $$(".menu__item, .menu__sep", agentMenu).forEach(function (it) { if (it.classList.contains("menu__sep")) { g = 1; return; } groups[g].push(it.dataset.value); });
+    var draft = null;
+    var chipsBox = el("div", "m-agent__chips");
+    groups.forEach(function (names) {
+      var row = el("div", "m-chips");
+      names.forEach(function (n) { var c = el("button", "m-chip", esc(n)); c.type = "button"; c.dataset.v = n; row.appendChild(c); });
+      chipsBox.appendChild(row);
+    });
+    var none = el("p", "m-empty", "No agents found"); none.hidden = true; chipsBox.appendChild(none);
+    ag.appendChild(chipsBox);
+    var agFoot = el("div", "m-sheet-foot", '<button class="m-btn m-btn--sec" type="button" data-m-clear>Clear</button><button class="m-btn" type="button" data-m-done>Done</button>');
+    ag.appendChild(agFoot);
+    var current = function () { var s = $(".menu__item.is-selected", agentMenu) || $('.menu__item[aria-selected="true"]', agentMenu); return s ? s.dataset.value : "Sales Agent"; };
+    var DEFAULT = current();
+    var paint = function () { $$(".m-chip", chipsBox).forEach(function (c) { var on = c.dataset.v === draft; c.classList.toggle("is-on", on); c.setAttribute("aria-pressed", on ? "true" : "false"); }); };
+    var filter = function (v) {
+      v = v.trim().toLowerCase(); var n = 0;
+      $$(".m-chip", chipsBox).forEach(function (c) { var ok = !v || c.dataset.v.toLowerCase().indexOf(v) > -1; c.hidden = !ok; if (ok) n++; });
+      $$(".m-chips", chipsBox).forEach(function (r) { r.hidden = !$$(".m-chip", r).some(function (c) { return !c.hidden; }); });
+      none.hidden = n > 0;
+    };
+    $("input", agSearch).addEventListener("input", function (e) { filter(e.target.value); });
+    chipsBox.addEventListener("click", function (e) { var c = e.target.closest(".m-chip"); if (c) { draft = c.dataset.v; paint(); } });
+    $("[data-m-clear]", agFoot).addEventListener("click", function () { draft = DEFAULT; $("input", agSearch).value = ""; filter(""); paint(); });
+    $("[data-m-done]", agFoot).addEventListener("click", function () {
+      closeSheet(ag);
+      if (draft && draft !== current()) {
+        var it = $('.menu__item[data-value="' + draft.replace(/"/g, '\\"') + '"]', agentMenu);
+        if (it) it.click();
+      }
+    });
+    agentBtn.addEventListener("click", function (e) {
+      if (!isM()) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      draft = current(); $("input", agSearch).value = ""; filter(""); paint();
+      openSheet(ag);
+    }, true);
+  }
+
+  /* ---------- profile menu as a sheet: just backdrop + grabber (CSS) ---------- */
+
+  /* ---------- pricing calculator: option sheets for the selects ---------- */
+  var calc = $('[data-modal="hm-calc"]');
+  if (calc) {
+    var OPTS = {
+      "Trailer Type": ["Open", "Enclosed", "Driveaway"],
+      "Inop": ["Run", "Not run"],
+      "Vehicle Type": ["ATV", "Boat", "Car", "Heavy equipment", "Large yacht", "Motorcycle", "Other", "Pickup", "RV", "SUV", "Travel trailer", "Van"]
+    };
+    var optSheet = makeSheet("m-optsheet is-top", "");
+    var optBox = el("div", "m-opts"); optSheet.appendChild(optBox);
+    var curSel = null;
+    $$(".hm-field", calc).forEach(function (f) {
+      var lab = f.firstElementChild ? f.firstElementChild.textContent.trim() : "";
+      var sel = $("select", f);
+      if (!sel || !OPTS[lab]) return;
+      var keep = sel.value;
+      sel.innerHTML = OPTS[lab].map(function (o) { return "<option>" + esc(o) + "</option>"; }).join("");
+      if (OPTS[lab].indexOf(keep) > -1) sel.value = keep;
+      var wrap = sel.parentNode;
+      wrap.addEventListener("click", function (e) {
+        if (!isM()) return;
+        e.preventDefault(); e.stopPropagation();
+        curSel = sel;
+        $("h2", optSheet).textContent = lab;
+        optSheet.setAttribute("aria-label", lab);
+        var opts = $$("option", sel);
+        optBox.style.setProperty("--cols", opts.length === 3 ? 3 : 2);
+        optBox.innerHTML = opts.map(function (o) {
+          var on = o.value === sel.value;
+          return '<button type="button" class="m-opt' + (on ? " is-on" : "") + '" aria-pressed="' + on + '" data-v="' + esc(o.value) + '">' + (on ? ICON.check : "") + esc(o.textContent) + "</button>";
+        }).join("");
+        openSheet(optSheet);
+      });
+    });
+    optBox.addEventListener("click", function (e) {
+      var b = e.target.closest(".m-opt"); if (!b || !curSel) return;
+      curSel.value = b.dataset.v;
+      curSel.dispatchEvent(new Event("change", { bubbles: true }));
+      closeSheet(optSheet);
+    });
+    // result rows read as labelled cards on a phone
+    var L = [null, null, "Distance", "Listed Price", "Date Listed", "Date Dispatched", "Status", "Final Price"];
+    var labelRows = function () {
+      $$(".hm-ptab__row", calc).forEach(function (r) {
+        $$(":scope > span", r).forEach(function (c, i) { if (L[i]) c.setAttribute("data-l", L[i]); });
+      });
+    };
+    labelRows();
+    var rowsBox = $("[data-hm-calc-rows]", calc);
+    if (rowsBox) new MutationObserver(labelRows).observe(rowsBox, { childList: true });
+    // close any option sheet when the calculator closes
+    new MutationObserver(function () { if (calc.hidden) open.slice().forEach(function (s) { if (s === optSheet) closeSheet(s); }); }).observe(calc, { attributes: true, attributeFilter: ["hidden"] });
+  }
+
+  /* ---------- notifications: full-screen page with a back button ---------- */
+  var np = $("[data-notif-panel]"), bell = $("[data-notif-btn]");
+  if (np && bell) {
+    var head = $(".notif-panel__head", np);
+    var back = el("button", "m-np-back", ICON.back); back.type = "button"; back.setAttribute("aria-label", "Back");
+    back.addEventListener("click", function () { if (!np.hidden) bell.click(); });
+    head.insertBefore(back, head.firstChild);
+    new MutationObserver(function () { root.classList.toggle("m-lock", isM() && !np.hidden); if (np.hidden) syncBd(); }).observe(np, { attributes: true, attributeFilter: ["hidden"] });
+  }
+
+  /* ---------- Home: state badges + carrier order labels ---------- */
+  function decorateHome() {
+    $$(".hm-state").forEach(function (s) {
+      if ($(".hm-state__badge", s)) return;
+      var tile = $('.hm-tile[data-st="' + s.dataset.st + '"]');
+      var lv = tile ? (tile.className.match(/\bl(\d)\b/) || [0, 1])[1] : 1;
+      var b = el("span", "hm-state__badge l" + lv, esc(s.dataset.st || ""));
+      b.setAttribute("aria-hidden", "true");
+      s.insertBefore(b, s.firstChild);
+    });
+    $$(".hm-crow__n").forEach(function (n) { n.classList.toggle("is-one", n.textContent.trim() === "1"); });
+  }
+  decorateHome();
+  var hmRoot = $("[data-hm-root]");
+  if (hmRoot) new MutationObserver(function () { clearTimeout(decorateHome.t); decorateHome.t = setTimeout(decorateHome, 30); }).observe(hmRoot, { childList: true, subtree: true });
+
+  /* ---------- Global search: result cards (09) ---------- */
+  function cl(node) { return node ? node.cloneNode(true) : null; }
+  function txt(r, s) { var x = $(s, r); return x ? x.textContent.trim() : ""; }
+  function buildCard(r) {
+    if ($(".gsm", r)) return;
+    var c = el("div", "gsm");
+    var top = el("div", "gsm__top", '<span class="gsm__id">' + esc(txt(r, ".oc-id .t")) + "</span>");
+    var tag = cl($(".oc-id .tag", r)); if (tag) top.appendChild(tag);
+    top.appendChild(el("span", "gsm__date", esc(txt(r, ".oc-date .t"))));
+    c.appendChild(top);
+    var veh = el("div", "gsm__veh");
+    var vt = el("div", "gsm__vt", "<b>" + esc(txt(r, ".vehicle__name")) + "</b>");
+    var sub = el("span", "gsm__sub", "<span>" + esc(txt(r, ".vtype")) + "</span>");
+    var prov = cl($(".oc-id .idprov", r));
+    if (prov) { sub.appendChild(el("span", "", "·")); sub.appendChild(prov); }
+    vt.appendChild(sub); veh.appendChild(vt);
+    var ph = cl($(".vehicle__photo", r)); if (ph) veh.appendChild(ph);
+    c.appendChild(veh);
+    var box = el("div", "gsm__box");
+    var route = cl($(".oc-route .route", r)); if (route) box.appendChild(route);
+    var notes = el("div", "gsm__notes");
+    var cs = $$(".oc-notes .counter", r);
+    notes.appendChild(cl(cs[0]) || el("span")); notes.appendChild(el("i"));
+    notes.appendChild(cl(cs[1]) || el("span")); notes.appendChild(el("i"));
+    notes.appendChild(cl($(".oc-notes .add-note", r)) || el("span"));
+    box.appendChild(notes);
+    c.appendChild(box);
+    var ct = el("div", "gsm__contact", "<b>" + esc(txt(r, ".contact-cell__name")) + "</b>");
+    $$(".oc-contacts .contact-cell__line", r).forEach(function (l) { ct.appendChild(cl(l)); });
+    c.appendChild(ct);
+    var car = el("div", "gsm__carrier", "<span>Carrier</span>");
+    var cv = el("span"); $$(".oc-carrier > *", r).forEach(function (x) { cv.appendChild(cl(x)); }); car.appendChild(cv);
+    c.appendChild(car);
+    c.appendChild(el("div", "gsm__prices",
+      "<span>Tariff<b>" + esc(txt(r, ".oc-tariff")) + "</b></span><i></i><span>Deposit<b>" + esc(txt(r, ".oc-deposit")) + "</b></span><i></i><span>Carrier Pay<b>" + esc(txt(r, ".oc-cpay")) + "</b></span>"));
+    r.appendChild(c);
+  }
+  function buildCards() { $$('[data-view="search"] [data-gs-row]').forEach(buildCard); }
+
+  /* run once images have their real sources */
+  // nav icons are filled in by earlier scripts; copy their final sources
+  function refreshIcons() {
+    $$("[data-mtab], [data-mmore]").forEach(function (b) {
+      var n = b.dataset.mtab || b.dataset.mmore;
+      var src = $('.topbar .nav__item[data-nav="' + n + '"]'); if (!src) return;
+      var from = $$("img", src), to = $$("img", b);
+      to.forEach(function (i, k) { if (from[k] && from[k].src && i.src !== from[k].src) i.src = from[k].src; });
+    });
+  }
+  function late() { refreshIcons(); buildCards(); decorateHome(); syncRoute(); syncBadge(); syncBd(); }
+  if (document.readyState === "complete") setTimeout(late, 0); else window.addEventListener("load", function () { setTimeout(late, 0); });
+  mq.addEventListener ? mq.addEventListener("change", syncBd) : mq.addListener(syncBd);
+})();
+</script>
+<!-- m-home:end -->
 </body></html>
