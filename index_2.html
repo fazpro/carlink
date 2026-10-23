@@ -19785,13 +19785,18 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
   (function () { var m = view(LEDIT); if (m) m.classList.add("mlq-form", "mlq-ledit"); })();
 
   /* ---------- which view is showing ---------- */
+  /* other flows (Orders) register their views here so the shared phone chrome follows them */
+  var X = window.CarlinkMLQX || (window.CarlinkMLQX = { lists: [], details: [], forms: [], bars: [] });
+  function inL(v) { return LISTS.indexOf(v) > -1 || X.lists.indexOf(v) > -1; }
+  function inD(v) { return DETAILS.indexOf(v) > -1 || X.details.indexOf(v) > -1; }
+  function inF(v) { return HUBS.indexOf(v) > -1 || v === LEDIT || X.forms.indexOf(v) > -1; }
   var hooks = [];
   function curView() { var v = $("main.view:not([hidden])"); return v ? v.dataset.view : ""; }
   function syncView() {
     var v = curView(), m = isM();
-    root.classList.toggle("mv-detail", m && DETAILS.indexOf(v) > -1);
-    root.classList.toggle("mv-form", m && (HUBS.indexOf(v) > -1 || v === LEDIT));
-    root.classList.toggle("mv-lq", m && (LISTS.indexOf(v) > -1 || DETAILS.indexOf(v) > -1 || HUBS.indexOf(v) > -1 || v === LEDIT));
+    root.classList.toggle("mv-detail", m && inD(v));
+    root.classList.toggle("mv-form", m && inF(v));
+    root.classList.toggle("mv-lq", m && (inL(v) || inD(v) || inF(v)));
     hooks.forEach(function (h) { try { h(v); } catch (e) { /* keep the page alive */ } });
   }
   var vObs = new MutationObserver(function () { clearTimeout(syncView.t); syncView.t = setTimeout(syncView, 0); });
@@ -19950,7 +19955,7 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
   document.body.appendChild(selHead);
   var bulkMore = M.makeSheet("m-bulkmore", "");
   var bmGrid = el("div", "m-bulkmore__grid"); bulkMore.appendChild(bmGrid);
-  var BARS = $$('.bulk-bar[data-bulk="quotes"], .bulk-bar[data-bulk="leads"]');
+  var BARS = $$('.bulk-bar[data-bulk="quotes"], .bulk-bar[data-bulk="leads"], .bulk-bar[data-bulk="orders"]');
   var MORE_LABELS = ["Save & convert to order", "Save & send quote", "Delete"];
   BARS.forEach(function (bar) {
     if (bar.dataset.bulk === "quotes") {
@@ -19991,7 +19996,7 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
   function activeBar() { return BARS.filter(function (b) { return !b.hidden; })[0] || null; }
   function syncSel() {
     var bar = activeBar();
-    var on = isM() && !!bar && LISTS.indexOf(curView()) > -1;
+    var on = isM() && !!bar && inL(curView());
     root.classList.toggle("m-selecting", on);
     if (on) $(".msel-head__n", selHead).textContent = txt(bar, "[data-count]");
     else if (!bulkMore.hidden) M.closeSheet(bulkMore);
@@ -20041,6 +20046,7 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
 
   function cardifyMini(main) {
     $$(".mini-table", main).forEach(function (t) {
+      if (t.hasAttribute("data-m-own")) return;
       var sched = t.classList.contains("mini-table--7");
       $$(".mini-table__row", t).forEach(function (r) {
         if ($(".msched, .mmsg", r)) return;
@@ -20383,6 +20389,13 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
     });
   })();
 
+  /* shared pieces for the Orders flow (m-orders) */
+  window.CarlinkMLQ = {
+    SVG: SVG, img: img, ICO: ICO, txt: txt, cl: cl, view: view, makeNav: makeNav, navBtn: navBtn,
+    openAssignee: openAssignee, createSheet: createSheet, USERS: USERS, hooks: hooks, syncView: syncView, curView: curView,
+    decorateDetail: decorateDetail, histSheet: histSheet
+  };
+
   /* ---------- run ---------- */
   function late() {
     LISTS.forEach(function (n) { var m = view(n); if (m) { $$(".mcard", m).forEach(function (c) { c.remove(); }); buildCards(m); } });
@@ -20396,4 +20409,974 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
 })();
 </script>
 <!-- m-lq:end -->
+<!-- m-orders:start -->
+<style>
+/* =====================================================================
+   Carlink — Mobile adaptation · Orders flow (Figma 📱 Mobile — Flow › Orders — Mobile design 1010:8183)
+   Phone only (≤767px). Builds on m-home + m-lq; everything here is scoped to Orders (.mo-*, html.mo-on).
+   Soft style from the Orders redesign: soft card shadow, lighter secondary fill.
+   ===================================================================== */
+.mo-toast, .mo-fab, .mo-stabs, .mo-steps, .mo-showmap, .mo-em-to, .mpay, .o-cr__meta { display: none; }
+:root { --mo-sec: #eef1f5; --mo-shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 16px rgba(16,24,40,.05); --mo-sheet: 0 -8px 32px rgba(16,24,40,.10); }
+html[data-theme="dark"] { --mo-sec: var(--soft-gray); --mo-shadow: 0 1px 2px rgba(0,0,0,.25); }
+
+@media (max-width: 767px) {
+  /* ---------- List (060–073) ---------- */
+  .mo-list .page-header { gap: 12px; }
+  .mo-list .header-actions { display: none !important; }
+  .mo-list .table .table__grid > .row.mo-deleted { display: none !important; }
+  .mo-list .page-header .tabs { order: 2; }
+  .mo-list .mfilter { order: 3; }
+  .mo-list .btn-columns, .mo-list .colmenu, .mo-list .colconfirm { display: none !important; }
+  .mo-list .table .summary { min-height: 0; padding: 0 0 0 4px !important; background: none !important; border: 0 !important; box-shadow: none !important; }
+  .mo-card.mcard { gap: 10px; padding: 12px; box-shadow: var(--mo-shadow); }
+  .row.is-selected > .mo-card.mcard { box-shadow: inset 0 0 0 1.5px var(--main), var(--mo-shadow); }
+  .mo-list .table .table__grid > .row > .c-select { top: 4px; left: 4px; }
+  .mo-card .mcard__top { min-height: 24px; padding-left: 32px; gap: 6px; }
+  .mo-card .mcard__id { font-size: 15px; }
+  .mo-card .mcard__top .tag { padding: 2px 8px; font-size: 12px; }
+  .mo-card .mcard__date { font-size: 13px; }
+  .mo-card .mcard__vt { gap: 2px; }
+  .mo-card .mcard__vt b { font-size: 15px; }
+  .mo-card .mcard__sub, .mo-card .mcard__sub .idprov { font-size: 13px; }
+  .mo-card .mcard__veh img { width: 48px; height: 32px; }
+  .mo-car-ph { display: grid; place-items: center; width: 48px; height: 32px; opacity: .5; }
+  .mo-card .mcard__box { border-radius: 10px; }
+  .mo-card .mcard__box .route { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 7px 10px; }
+  .mo-card .mcard__box .route__line { gap: 6px; font-size: 14px; }
+  .mo-card .mcard__box .route__line + .route__line::before { content: "→"; margin-right: 2px; color: var(--soft-gray); }
+  .mo-card .mcard__box .route__line img { width: 14px; height: 14px; }
+  .mo-ship { display: flex; align-items: center; gap: 8px; min-height: 32px; }
+  .mo-ship__n { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 500; color: var(--black); }
+  .mo-ship__notes { display: flex; align-items: center; gap: 8px; }
+  .mo-ship__notes .counter { display: inline-flex; align-items: center; gap: 3px; min-height: 0; padding: 0; font-size: 13px; color: var(--main); }
+  .mo-ship__notes .counter img { width: 14px; height: 14px; }
+  .mo-tile { flex: none; display: grid !important; place-items: center; width: 32px; height: 32px; margin: 0 !important; border: 0; border-radius: 10px; background: var(--mo-sec) !important; color: var(--light-black); }
+  .mo-tile svg { width: 16px; height: 16px; }
+  .mo-tile img { width: 24px; height: 24px; }
+  .mo-tile:disabled { opacity: .4; }
+  .mo-tile::before { content: ""; position: absolute; inset: -6px; }
+  .mo-tile { position: relative; }
+  .mo-sp { display: flex; flex-direction: column; gap: 6px; padding: 7px 10px; border-radius: 10px; background: var(--bg); }
+  .mo-sp__row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; font-size: 13px; color: var(--black); }
+  .mo-sp__row > span { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; }
+  .mo-sp__row i { font-style: normal; font-size: 12px; color: var(--light-black); white-space: nowrap; }
+  .mo-sp__row b { font-weight: 500; white-space: nowrap; }
+  .mo-sp__row b.is-empty { font-weight: 400; color: var(--light-black); }
+  .mo-sp__car > span { flex: 1 1 auto; }
+  .mo-sp__car b { overflow: hidden; text-overflow: ellipsis; }
+  .mo-sp__car em { flex: none; font-style: normal; font-size: 12px; color: var(--light-black); }
+  .mo-sp__none { font-size: 12px; color: var(--light-black); }
+  .mo-list .pagination { display: flex; flex-direction: column-reverse; align-items: center; gap: 8px; padding: 12px 0 96px !important; }
+  .mo-list .pagination .pages { display: flex; gap: 8px; }
+  .mo-list .pagination .page-btn { min-width: 44px; height: 44px; border-radius: 12px; background: var(--surface); box-shadow: var(--mo-shadow); }
+  .mo-list .pagination .page-btn.is-active { background: var(--main); color: #fff; }
+  .mo-list .pagination .page-size { display: none; }
+  .mo-list .pagination__info { font-size: 13px; color: var(--light-black); }
+  .mo-fab {
+    position: fixed; right: 17px; bottom: calc(90px + 13px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: inline-flex; align-items: center; gap: 6px;
+    height: 44px; padding: 0 14px 0 12px; border: 0; border-radius: 12px; background: var(--main); color: #fff; font-size: 14px; font-weight: 500;
+    box-shadow: 0 6px 20px rgba(0, 95, 249, .28); transition: transform .2s var(--ease-spring, ease);
+  }
+  .mo-fab svg { width: 18px; height: 18px; }
+  .mo-fab:active { transform: scale(.97); }
+  html.m-selecting .mo-fab, .mo-list[hidden] .mo-fab { display: none; }
+
+  /* selection bar (073) — soft white bar, brand icons */
+  .bulk-bar[data-bulk="orders"] {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: grid !important; grid-template-columns: repeat(3, 1fr); row-gap: 4px;
+    margin: 0; padding: 12px 8px calc(10px + env(safe-area-inset-bottom, 0px)); border: 0; border-radius: 24px 24px 0 0;
+    background: var(--surface); box-shadow: var(--mo-sheet); transform: none; width: auto; max-width: none;
+  }
+  .bulk-bar[data-bulk="orders"][hidden] { display: none !important; }
+  .bulk-bar[data-bulk="orders"] .bar-divider, .bulk-bar[data-bulk="orders"] .bar-clear, .bulk-bar[data-bulk="orders"] .o-bar-spacer { display: none !important; }
+  .bulk-bar[data-bulk="orders"] [data-count] { grid-column: 1 / -1; justify-self: center; height: auto; padding: 0; font-size: 13px; color: var(--light-black); background: none; }
+  .bulk-bar[data-bulk="orders"] .bar-btn:not([data-count]) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 56px; padding: 0; border-radius: 12px; background: none; color: var(--black); font-size: 12px; }
+  .bulk-bar[data-bulk="orders"] .bar-btn:not([data-count]):active { background: var(--bg); }
+  .bulk-bar[data-bulk="orders"] .bar-btn img { width: 22px; height: 22px; filter: brightness(0) saturate(100%) invert(26%) sepia(97%) saturate(4400%) hue-rotate(213deg) brightness(101%) contrast(104%); }
+  .bulk-bar[data-bulk="orders"] .bar-label { display: block !important; font-size: 12px; font-weight: 500; }
+
+  /* ---------- Detail (080–089) ---------- */
+  .mo-detail .lead-header { row-gap: 12px; }
+  main.mo-detail.o-detail .lead-header .o-actions .o-sq { display: none !important; }
+  .mo-steps { order: 1; display: flex; gap: 8px; margin-left: auto; }
+  .mo-steps .m-ldstep { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 12px; background: var(--surface); color: var(--black); box-shadow: var(--mo-shadow); }
+  .mo-steps .m-ldstep svg { width: 20px; height: 20px; }
+  .mo-steps .m-ldstep:disabled { opacity: .4; }
+  .mo-detail .lead-title-row .tag.mo-tag--orange { background: rgba(246, 142, 66, .14); color: #e07a2f; }
+  .mo-detail .lead-title-row .tag.mo-tag--green { background: rgba(13, 194, 104, .14); color: #0dad5c; }
+  .mo-detail .lead-title-row .tag.mo-tag--blue { background: var(--main-12); color: var(--main); }
+  main.mo-detail.o-detail .lead-actions.o-actions {
+    order: 3; flex-basis: 100%; display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 !important;
+  }
+  main.mo-detail.o-detail .o-actions > a.btn-primary, main.mo-detail.o-detail .o-actions > .oh-more-dd { display: none !important; }
+  main.mo-detail.o-detail .o-actions > .btn-secondary, main.mo-detail.o-detail .o-actions > .oh-post-dd > .btn-secondary {
+    order: 5; display: inline-flex !important; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 44px; margin: 0 !important; padding: 0 8px;
+    border: 0; border-radius: 12px; background: var(--mo-sec); color: var(--black); font-size: 14px; font-weight: 500; white-space: nowrap;
+  }
+  main.mo-detail.o-detail .o-actions > .oh-post-dd { order: 6; display: block !important; min-width: 0; }
+  main.mo-detail.o-detail .o-actions > .oh-post-dd .menu { display: none !important; }
+  main.mo-detail.o-detail .o-actions .o-cm { order: 5; }
+  main.mo-detail.o-detail .o-actions .o-cm__n { padding: 1px 6px; border-radius: 100px; background: var(--surface); font-size: 12px; color: var(--light-black); }
+  main.mo-detail.o-detail .o-actions .mo-a-dsp { order: 1; background: var(--main); color: #fff; }
+  main.mo-detail.o-detail .o-actions .mo-a-pay { order: 2; }
+  main.mo-detail.o-detail .o-actions .oh-dsp-btn { display: none !important; }
+  main.mo-detail.o-detail.oh-is-dispatched .o-actions .mo-a-deliv { order: 0; grid-column: 1 / -1; display: inline-flex !important; background: var(--main); color: #fff; }
+  main.mo-detail.o-detail.oh-is-dispatched .o-actions .mo-a-cancel { order: 1; display: inline-flex !important; }
+  main.mo-detail.o-detail.oh-is-dispatched .o-actions .mo-a-pay { order: 2; }
+  main.mo-detail.o-detail.oh-is-dispatched .o-actions .mo-a-dsp, main.mo-detail.o-detail.oh-is-dispatched .o-actions .o-cm, main.mo-detail.o-detail.oh-is-dispatched .o-actions > .oh-post-dd { display: none !important; }
+  main.mo-detail.o-detail.mo-is-delivered .o-actions .mo-a-deliv, main.mo-detail.o-detail.mo-is-delivered .o-actions .mo-a-cancel { display: none !important; }
+  main.mo-detail.o-detail.mo-is-delivered .o-actions .mo-a-pay { grid-column: 1 / -1; }
+  .mo-stabs {
+    position: sticky; top: var(--mo-nav-h, 64px); z-index: 30; display: block; margin: -4px -16px 0; padding: 4px 16px 8px; background: var(--bg);
+  }
+  .mo-stabs__track { display: grid; grid-template-columns: repeat(4, 1fr); padding: 3px; border-radius: 12px; background: var(--mo-sec); }
+  .mo-stabs__t { height: 36px; border: 0; border-radius: 9px; background: none; color: var(--light-black); font-size: 14px; }
+  .mo-stabs__t.is-on { background: var(--surface); color: var(--black); font-weight: 500; box-shadow: 0 1px 3px rgba(16,24,40,.08); }
+  .mo-detail .ld-card, .mo-detail .ld-block { box-shadow: var(--mo-shadow) !important; scroll-margin-top: 140px; }
+  .mo-detail .ld-btns .o-gbtn, .mo-detail .o-gbtn { height: 44px; border: 0 !important; border-radius: 12px; background: var(--mo-sec) !important; color: var(--black); font-size: 14px; font-weight: 500; }
+  .mo-detail .o-btns3 { grid-template-columns: 1fr 1fr !important; }
+  .mo-detail .o-btns3 .o-gbtn:last-child { grid-column: 1 / -1; }
+  /* section order on the phone (Figma 080) */
+  .mo-detail .ld-profile { order: 1; }
+  .mo-detail .ld-side > .ld-list:nth-of-type(2) { order: 2; }
+  .mo-detail .ld-side > .ld-list:nth-of-type(3) { order: 3; }
+  .mo-detail .ld-side > .ld-list:nth-of-type(4) { order: 4; }
+  .mo-detail .ld-side > .ld-list:nth-of-type(5) { order: 5; }
+  .mo-detail .ld-side > .ld-list:nth-of-type(6) { order: 6; }
+  .mo-detail .ld-route { order: 7; }
+  .mo-detail .o-mapcard { order: 8; display: none !important; }
+  .mo-detail.mo-map-on .o-mapcard { display: flex !important; padding: 8px !important; }
+  .mo-detail .o-mapcard .ld-head, .mo-detail .o-mapcard [data-o-map-toggle] { display: none !important; }
+  .mo-detail .o-mapcard .o-map { height: 200px; border-radius: 12px; overflow: hidden; }
+  .mo-detail .ld-vehicles { order: 9; }
+  .mo-detail .oh-di { order: 10; }
+  .mo-detail .ld-main > .ld-block:not(.oh-di) { order: 11; }
+  .mo-showmap { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 0; border-radius: 12px; background: var(--mo-sec); color: var(--black); font-size: 14px; font-weight: 500; }
+  .mo-showmap img { width: 18px; height: 18px; }
+  .mo-detail .oh-di__cols { display: flex !important; flex-direction: column; gap: 12px; }
+  .mo-detail .oh-di__box { padding: 12px; border-radius: 12px; background: var(--bg); }
+  .mo-detail .oh-di__kv { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+  .mo-detail .ld-chan.mo-copied { background: var(--main-12) !important; }
+  .mo-detail .ld-head__t .m-lbl-full { display: none; }
+  .mo-detail .ld-head__t .m-lbl-short { display: inline; }
+  .mo-detail .o-head-btns { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; order: 3; flex-basis: 100%; margin: 4px 0 0 !important; }
+  .mo-detail .o-head-btns .o-gbtn { width: 100%; }
+  .mo-detail .ld-block:has(.o-head-btns) .ld-head { flex-wrap: wrap; }
+  .mo-detail .mini-table[data-m-own] .mini-table__row { display: block !important; padding: 0 !important; border: 0 !important; }
+  .mo-detail .mini-table[data-m-own] .mini-table__row > .mini-table__td, .mo-detail .mini-table[data-m-own] .mini-table__head, .mo-detail .mini-table[data-m-own] [role="row"]:has(.mini-table__th) { display: none !important; }
+  .mpay { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: var(--bg); }
+  .mpay__top { display: flex; align-items: center; justify-content: space-between; }
+  .mpay__top b { font-size: 16px; font-weight: 600; color: var(--black); }
+  .mpay__chip { padding: 3px 8px; border-radius: 100px; background: var(--mo-sec); font-size: 12px; font-weight: 500; color: var(--black); }
+  .mpay__kv { display: flex; justify-content: space-between; font-size: 13px; color: var(--light-black); }
+  .mpay__kv b { font-weight: 400; color: var(--black); }
+
+  /* sheets: post / history / delete */
+  .mo-post .m-acts__it img, .mo-post .m-acts__it svg { width: 20px; height: 20px; flex: none; }
+  .mo-hist__list { display: flex; flex-direction: column; gap: 8px; padding: 4px 16px 20px; }
+  .mo-hist__meta, .mo-hist__m { margin: 0; font-size: 13px; color: var(--light-black); }
+  .mo-hist__m { font-size: 12px; font-weight: 500; }
+  .mo-hist__it { display: flex; gap: 12px; padding: 12px; border-radius: 12px; background: var(--bg); }
+  .mo-hist__it > i { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--main-12); color: var(--main); font-size: 12px; font-style: normal; font-weight: 500; }
+  .mo-hist__it > div { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .mo-hist__top { display: flex; justify-content: space-between; gap: 8px; }
+  .mo-hist__top b { font-size: 14px; font-weight: 500; color: var(--black); }
+  .mo-hist__top span { font-size: 12px; color: var(--light-black); }
+  .mo-hist__ch { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--black); }
+  .mo-hist__ch span { color: var(--light-black); }
+  .mo-hist__ch b { font-weight: 500; }
+  .mo-confirm__t { margin: 0; padding: 4px 16px 0; font-size: 14px; line-height: 20px; color: var(--light-black); }
+  .m-btn.mo-btn--danger { background: #e64141; color: #fff; }
+
+  /* toast (Figma Toast · Success / Error) */
+  .mo-toast {
+    position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 16px; right: 16px; z-index: 300; display: flex; align-items: flex-start; gap: 10px;
+    padding: 13px 14px; border-radius: 12px; background: var(--surface); box-shadow: 0 8px 24px rgba(16,24,40,.14), inset 0 0 0 1px var(--soft-gray);
+    font-size: 14px; line-height: 20px; font-weight: 500; color: #0dad5c; opacity: 0; transform: translateY(-12px); transition: opacity .2s ease, transform .28s var(--ease-out-expo, ease);
+  }
+  .mo-toast[hidden] { display: none; }
+  .mo-toast.is-in { opacity: 1; transform: none; }
+  .mo-toast.is-err { color: #e64141; }
+  .mo-toast svg { flex: none; width: 20px; height: 20px; }
+  html.mo-on .upd-toast {
+    top: calc(12px + env(safe-area-inset-top, 0px)) !important; bottom: auto !important; left: 16px !important; right: 16px !important; transform: none !important;
+    width: auto !important; max-width: none !important; padding: 13px 14px !important; border-radius: 12px !important; background: var(--surface) !important;
+    box-shadow: 0 8px 24px rgba(16,24,40,.14), inset 0 0 0 1px var(--soft-gray) !important; color: #0dad5c !important; font-size: 14px !important; font-weight: 500;
+  }
+  html.mo-on .upd-toast.upd-toast--err { color: #e64141 !important; }
+  html.mo-on .upd-toast { display: flex !important; align-items: flex-start; gap: 10px; }
+  html.mo-on .upd-toast::before { content: ""; flex: none; width: 20px; height: 20px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect x='1.5' y='1.5' width='17' height='17' rx='5' fill='%230DC268'/%3E%3Cpath d='m6 10.2 2.6 2.6L14 7.4' stroke='%23fff' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px no-repeat; }
+  html.mo-on .upd-toast.upd-toast--err::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8.5' fill='%23E64141'/%3E%3Cpath d='M10 5.8v5M10 13.9h.01' stroke='%23fff' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E"); }
+  main.mo-detail .oh-plat { display: none !important; }
+  html.mo-on [data-toast]:not([hidden]) { top: calc(12px + env(safe-area-inset-top, 0px)) !important; left: 16px !important; right: 16px !important; width: auto !important; max-width: none !important; border-radius: 12px !important; }
+
+  /* ---------- dialogs opened from Orders become bottom sheets ---------- */
+  html.mo-on .modal[data-modal="o-carriers"], html.mo-on .modal[data-modal="o-payment"], html.mo-on .modal[data-modal="o-dispatch"],
+  html.mo-on .modal[data-modal="pricing"], html.mo-on .modal[data-modal="email"], html.mo-on .modal[data-modal="similar"],
+  html.mo-on .modal[data-modal="sms"], html.mo-on .modal[data-modal="note"], html.mo-on .modal[data-modal="reassign"] {
+    position: fixed !important; top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important; transform: none !important;
+    display: flex; flex-direction: column; width: 100% !important; max-width: none !important; max-height: calc(100dvh - 48px) !important; margin: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px); border-radius: 24px 24px 0 0 !important; box-shadow: var(--mo-sheet) !important; overflow: hidden;
+    animation: m-up .32s var(--ease-out-expo, ease) !important;
+  }
+  html.mo-on .modal[hidden] { display: none !important; }
+  html.mo-on .modal[data-modal="o-carriers"]::before, html.mo-on .modal[data-modal="o-payment"]::before, html.mo-on .modal[data-modal="o-dispatch"]::before,
+  html.mo-on .modal[data-modal="pricing"]::before, html.mo-on .modal[data-modal="email"]::before {
+    content: ""; display: block; flex: none; width: 36px; height: 4px; margin: 8px auto 0; border-radius: 4px; background: var(--soft-gray);
+  }
+  html.mo-on .modal[data-modal] .modal__head { align-items: center; padding: 12px 16px 4px; }
+  html.mo-on .modal[data-modal] .modal__title { font-size: 18px; font-weight: 600; }
+  html.mo-on .modal[data-modal] .modal__close { flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--bg); }
+  html.mo-on .modal[data-modal] .modal__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 12px 16px 4px; }
+  html.mo-on .modal[data-modal] .modal__foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 16px; }
+  html.mo-on .modal[data-modal] .modal__foot .btn-secondary, html.mo-on .modal[data-modal] .modal__foot .btn-primary { width: 100%; height: 48px; border-radius: 12px; font-size: 15px; }
+  html.mo-on .modal[data-modal] .modal__foot .btn-secondary { border: 0; background: var(--mo-sec); }
+  html.mo-on .modal[data-modal] .field-input { min-height: 42px; border-radius: 12px; font-size: 16px; }
+
+  /* carrier matches (083) */
+  html.mo-on [data-modal="o-carriers"] .modal__sub { font-size: 14px; }
+  html.mo-on [data-modal="o-carriers"] .o-cm-top { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; }
+  html.mo-on [data-modal="o-carriers"] .o-cm-from { margin-left: auto; }
+  html.mo-on [data-modal="o-carriers"] .o-cm-sel { width: auto; min-height: 36px !important; }
+  html.mo-on [data-modal="o-carriers"] .o-preview { display: flex; align-items: center; gap: 8px; width: 100%; height: 40px; margin: 12px 0; padding: 0 12px; border: 0; border-radius: 10px; background: var(--bg); text-align: left; }
+  html.mo-on [data-modal="o-carriers"] .o-preview span { white-space: nowrap; }
+  html.mo-on [data-modal="o-carriers"] .o-cr-table { display: flex; flex-direction: column; gap: 8px; }
+  html.mo-on [data-modal="o-carriers"] .o-cr {
+    display: grid !important; grid-template-columns: 22px 1fr auto; grid-template-areas: "s n n" "s m m" "s c c"; align-items: center; gap: 4px 12px;
+    padding: 11px 12px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--soft-gray);
+  }
+  html.mo-on [data-modal="o-carriers"] .o-cr.o-cr--head { display: none !important; }
+  html.mo-on [data-modal="o-carriers"] .o-cr.is-selected { background: var(--main-12); box-shadow: inset 0 0 0 1px var(--main); }
+  html.mo-on [data-modal="o-carriers"] .o-cr__sel { grid-area: s; align-self: start; }
+  html.mo-on [data-modal="o-carriers"] .o-cr__name { grid-area: n; display: flex !important; flex-direction: row !important; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; }
+  html.mo-on [data-modal="o-carriers"] .o-cr__name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; }
+  html.mo-on [data-modal="o-carriers"] .o-cr__name small { flex: none; font-size: 12px; color: var(--light-black); }
+  html.mo-on [data-modal="o-carriers"] .o-cr > .o-cr__num { display: none; }
+  html.mo-on [data-modal="o-carriers"] .o-cr__meta { grid-area: m; display: flex; gap: 10px; font-size: 13px; color: var(--black); }
+  html.mo-on [data-modal="o-carriers"] .o-cr__meta i { font-style: normal; color: var(--light-black); margin-right: 3px; }
+  html.mo-on [data-modal="o-carriers"] .o-cr__contact { grid-area: c; display: flex !important; flex-direction: row !important; justify-content: flex-start !important; align-items: baseline; gap: 8px; min-width: 0; text-align: left; }
+  html.mo-on [data-modal="o-carriers"] .o-cr__contact b { font-size: 13px; font-weight: 400; white-space: nowrap; }
+  html.mo-on [data-modal="o-carriers"] .o-cr__contact small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--light-black); }
+
+  /* create payment (084) */
+  html.mo-on [data-modal="o-payment"] .o-pay__row { grid-template-columns: 1fr 1fr; }
+
+  /* dispatch wizard (085–087): steps across the top */
+  html.mo-on .modal[data-modal="o-dispatch"] { height: calc(100dvh - 48px) !important; }
+  html.mo-on [data-modal="o-dispatch"].o-wiz { flex-direction: column !important; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__side, html.mo-on [data-modal="o-dispatch"] .o-wiz__main { display: contents !important; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__side > div:first-child { order: 1; display: flex !important; flex-direction: row !important; align-items: center; justify-content: flex-start; align-self: stretch; gap: 4px; padding: 14px 76px 0 16px; text-align: left; font-size: 12px; color: var(--light-black); }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__eyebrow::after { content: " ·"; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__order { font-size: 12px; font-weight: 400; color: var(--light-black); }
+  html.mo-on [data-modal="o-dispatch"] .modal__head { order: 2; align-self: stretch; padding: 0 16px 0 !important; text-align: left; }
+  html.mo-on [data-modal="o-dispatch"] .modal__head .modal__close { margin-top: -26px; }
+  html.mo-on [data-modal="o-dispatch"] .modal__head .modal__sub { display: none; }
+  html.mo-on [data-modal="o-dispatch"] .o-steps { order: 3; display: flex !important; flex-direction: row !important; align-items: center; align-self: stretch; gap: 8px; margin: 10px 16px 0; padding: 0; list-style: none; }
+  html.mo-on [data-modal="o-dispatch"] .o-steps li { display: flex; align-items: center; gap: 6px; flex: none; padding: 0 !important; font-size: 13px; color: var(--light-black); white-space: nowrap; }
+  html.mo-on [data-modal="o-dispatch"] .o-steps li + li::before { content: ""; width: 20px; height: 2px; border-radius: 2px; background: var(--soft-gray); }
+  html.mo-on [data-modal="o-dispatch"] .o-steps li.is-done + li::before { background: var(--main); }
+  html.mo-on [data-modal="o-dispatch"] .o-steps li.is-active { color: var(--black); font-weight: 500; }
+  html.mo-on [data-modal="o-dispatch"] .o-steps li::after { display: none !important; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__sum { order: 4; display: flex !important; flex-direction: row !important; align-items: center; align-self: stretch; gap: 6px; margin: 12px 16px 0; padding: 10px 12px; border-radius: 10px; background: var(--bg); font-size: 13px; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__sum .o-dot { display: none; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__sum span + span::before { content: "→ "; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__sum small { margin: 0 0 0 auto; padding: 0; border: 0; color: var(--light-black); white-space: nowrap; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__body { order: 5; align-self: stretch; flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 16px; }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__body::before { content: "Choose where to dispatch your load"; font-size: 14px; color: var(--light-black); }
+  html.mo-on [data-modal="o-dispatch"] .o-wiz__body:not(:has(.o-radio))::before { display: none; }
+  html.mo-on [data-modal="o-dispatch"] .modal__foot { order: 6; align-self: stretch; display: flex !important; gap: 8px; }
+  html.mo-on [data-modal="o-dispatch"] .modal__foot > * { flex: 1 1 0; }
+  html.mo-on [data-modal="o-dispatch"] .modal__foot [data-close] { display: none !important; }
+  html.mo-on [data-modal="o-dispatch"] .o-radio { height: 46px; border-radius: 12px; font-size: 14px; }
+  html.mo-on [data-modal="o-dispatch"] .dw-grid, html.mo-on [data-modal="o-dispatch"] .dw-grid--2 { grid-template-columns: 1fr 1fr !important; gap: 12px; }
+  html.mo-on [data-modal="o-dispatch"] .dw-sel { border-width: 1px !important; }
+
+  /* pricing (088): CD not connected → one red alert, Carlink Price card */
+  html.mo-on .modal[data-modal="pricing"] { --w: 100% !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off .ptable__groups, html.mo-on [data-modal="pricing"].oh-cd-off .ptable__cols { display: none !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off .oh-perr { border: 0 !important; background: none !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off .ptable__scroll { overflow: visible !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off .ptable__error { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 14px; border-radius: 12px; background: rgba(230, 65, 65, .12); color: #e64141; font-size: 14px; line-height: 20px; white-space: normal; }
+  html.mo-on [data-modal="pricing"].oh-cd-off .tabs button.tab:not(:first-of-type) { display: flex !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off.mo-cl .oh-perr { display: none !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off.mo-cl [data-ppanel="cl"] { display: flex !important; flex-direction: column; gap: 12px; }
+  html.mo-on [data-modal="pricing"] .oh-perr, html.mo-on [data-modal="pricing"] .oh-perr .ptable__scroll { width: auto !important; min-width: 0 !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off .oh-perr .ptable__scroll { display: block !important; width: 100% !important; }
+  html.mo-on [data-modal="pricing"].oh-cd-off .oh-perr .ptable__error { width: 100% !important; min-width: 0 !important; box-sizing: border-box; max-width: none !important; white-space: normal !important; position: static !important; }
+  html.mo-on [data-modal="pricing"] .cp-card { padding: 16px; border-radius: 16px; }
+  html.mo-on [data-modal="pricing"] .cp-card__top { display: grid !important; grid-template-columns: 40px 1fr; align-items: center; gap: 10px 10px; }
+  html.mo-on [data-modal="pricing"] .cp-card__price { grid-column: 1 / -1; display: flex !important; flex-direction: row !important; align-items: center; gap: 10px; margin: 6px 0 0 !important; text-align: left !important; }
+  html.mo-on [data-modal="pricing"] .cp-card__num { font-size: 36px; line-height: 42px; }
+  html.mo-on [data-modal="pricing"] .cp-card__mile { padding: 3px 10px; border-radius: 100px; background: var(--surface); font-size: 12px; }
+  html.mo-on [data-modal="pricing"] .cp-route { flex-wrap: wrap; row-gap: 6px; }
+  html.mo-on [data-modal="pricing"] .tabs { align-self: stretch !important; display: grid !important; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 12px; background: var(--mo-sec); }
+  html.mo-on [data-modal="pricing"] .tabs .tab { justify-content: center; height: 32px; border-radius: 9px; font-size: 14px; }
+  html.mo-on [data-modal="pricing"] .ptable__scroll { overflow-x: auto; }
+  html.mo-on [data-modal="pricing"] .ps-sum { grid-template-columns: 1fr 1fr !important; }
+  html.mo-on [data-modal="pricing"] .cp-card__top { flex-wrap: wrap; }
+
+  /* e-mail composer: carrier "To" row while dispatching via e-mail (081.3) */
+  p.mo-em-to:not([hidden]) { display: block; }
+  span.mo-em-to:not([hidden]) { display: flex; }
+  html.mo-on [data-modal="email"] .modal__sub.mo-hide { display: none; }
+  main.mo-detail .mnav { background: var(--bg); }
+
+  /* ---------- New order hub (New order 01–04) + steps ---------- */
+  .mo-hub .lead-actions { grid-template-columns: 1fr !important; }
+  .mo-hub .lead-actions .nl-save { background: var(--main); color: #fff; }
+  .mo-hub .mhub__card, .mo-hub .nl-block.m-hubblock, .mo-edit .nl-block { box-shadow: var(--mo-shadow) !important; }
+  .mo-hub .mhub__card .mhub__body:empty { display: none; }
+  .mo-hub-kv { display: flex; justify-content: space-between; font-size: 14px; color: var(--light-black); }
+  .mo-hub-kv b { font-weight: 500; color: var(--black); }
+  html.mv-step .mo-hub .lead-actions { display: none !important; }
+  .mo-hub .nl-block.m-step .o-box { padding: 12px; border-radius: 12px; background: var(--bg); }
+
+  /* ---------- Edit order (091): long form ---------- */
+  .mo-edit { gap: 8px; padding-top: 0; }
+  .mo-edit > .lead-header { display: contents !important; }
+  .mo-edit > .lead-header .lead-header__title { display: none !important; }
+  .mo-edit .nl-cols { display: flex !important; flex-direction: column; align-items: stretch !important; gap: 8px; width: 100%; min-width: 0; padding-bottom: 96px; }
+  .mo-edit .nl-main, .mo-edit .nl-side, .mo-edit .nl-route { display: contents !important; }
+  .mo-edit .nl-block { width: 100% !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; border: 0 !important; border-radius: 16px !important; background: var(--surface) !important; box-sizing: border-box; }
+  .mo-edit .nl-block--top { border-radius: 16px 16px 0 0 !important; }
+  .mo-edit .nl-block--bottom { margin-top: -8px !important; border-radius: 0 0 16px 16px !important; }
+  .mo-edit .nl-grid, .mo-edit .nl-row { grid-template-columns: 1fr !important; }
+  .mo-edit .nl-input { min-height: 42px; border-radius: 12px; font-size: 16px; }
+  .mo-edit .nl-map { width: 100% !important; height: 200px; border-radius: 12px; }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .mo-toast, .mo-fab { transition: none; }
+}
+</style>
+<script>
+/* Carlink — Mobile adaptation · Orders flow (Figma 📱 Mobile — Flow › Orders — Mobile design 1010:8183). Phone only (≤767px).
+   List 060–073 · Order detail 080–089 · Dispatch wizard 085–087 · New order hub + steps · Edit order 091. */
+(function () {
+  "use strict";
+  var M = window.CarlinkM, L = window.CarlinkMLQ, X = window.CarlinkMLQX;
+  if (!M || !L || !X) return;
+  var isM = M.isM, el = M.el, esc = M.esc, SVG = L.SVG, img = L.img, txt = L.txt, cl = L.cl;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var root = document.documentElement;
+  var A = window.__A || {};
+  var ICO = function (k) { return A["assets/icons/" + k] || ""; };
+  function view(n) { return $('main.view[data-view="' + n + '"]'); }
+  function hashBase() { return location.hash.replace(/^#\/?/, ""); }
+
+  var OL = view("orders"), OD = view("order"), ON = view("order-new"), OE = view("order-edit");
+  if (!OL || !OD) return;
+
+  X.lists.push("orders"); X.details.push("order"); X.forms.push("order-new", "order-edit");
+  OL.classList.add("mlq-list", "mo-list");
+  OD.classList.add("mlq-detail", "mo-detail");
+  if (ON) ON.classList.add("mlq-form", "mlq-hub", "mo-form", "mo-hub");
+  if (OE) OE.classList.add("mlq-form", "mo-form", "mo-edit");
+  var MO_VIEWS = ["orders", "order", "order-new", "order-edit"];
+
+  var I = {
+    phone: '<svg viewBox="0 0 16 16" fill="none"><path d="M5.6 2.4 4.3 2a1.3 1.3 0 0 0-1.5.7l-.6 1.3c-.3.7-.3 1.5.1 2.2a14.7 14.7 0 0 0 7.5 7.5c.7.4 1.5.4 2.2.1l1.3-.6c.6-.3.9-.9.7-1.5l-.4-1.3a1.3 1.3 0 0 0-1.4-.9l-1.6.2c-.4.1-.8-.1-1-.4L7.8 8a7 7 0 0 1-1-1.6.9.9 0 0 1 .1-1l.6-1a1.3 1.3 0 0 0 0-1.4L6.9 2.6a1.3 1.3 0 0 0-1.3-.2Z" fill="currentColor"/></svg>',
+    mail: '<svg viewBox="0 0 16 16" fill="none"><rect x="1.8" y="3.2" width="12.4" height="9.6" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="m2.6 4.4 5.4 4 5.4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    plus: '<svg viewBox="0 0 18 18" fill="none"><path d="M9 3.5v11M3.5 9h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    check: '<svg viewBox="0 0 20 20" fill="none"><rect x="1.5" y="1.5" width="17" height="17" rx="5" fill="#0DC268"/><path d="m6 10.2 2.6 2.6L14 7.4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    warn: '<svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8.5" fill="#E64141"/><path d="M10 5.8v5M10 13.9h.01" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    pin: '<svg viewBox="0 0 16 16" fill="none"><path d="M8 14.6s4.8-4.1 4.8-8A4.8 4.8 0 0 0 3.2 6.6c0 3.9 4.8 8 4.8 8Z" stroke="#E64141" stroke-width="1.4"/><circle cx="8" cy="6.6" r="1.7" stroke="#E64141" stroke-width="1.4"/></svg>',
+    trash: '<svg viewBox="0 0 20 20" fill="none"><path d="M3.5 5.5h13M8 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5M5 5.5l.7 10a1.6 1.6 0 0 0 1.6 1.5h5.4a1.6 1.6 0 0 0 1.6-1.5l.7-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+  /* ---------- toast (Figma Toast · Success / Error) ---------- */
+  var toastEl = null, toastT = null;
+  function toast(msg, err) {
+    if (!toastEl) { toastEl = el("div", "mo-toast mlq-only"); toastEl.setAttribute("role", "status"); document.body.appendChild(toastEl); }
+    toastEl.className = "mo-toast mlq-only" + (err ? " is-err" : "");
+    toastEl.innerHTML = (err ? I.warn : I.check) + "<span>" + esc(msg) + "</span>";
+    toastEl.hidden = false; toastEl.classList.remove("is-in"); void toastEl.offsetWidth; toastEl.classList.add("is-in");
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove("is-in"); setTimeout(function () { toastEl.hidden = true; }, 220); }, 3200);
+  }
+
+  function curId() { var h = $(".lead-title-row .page-title, .lead-header .page-title", OD); return h ? txt(h) : ""; }
+
+  /* =====================================================================
+     LIST (060–073)
+     ===================================================================== */
+  function moneyCell(row, col) { var c = $('[data-col="' + col + '"]', row); var v = c ? txt(c) : ""; return v && v !== "—" ? v : ""; }
+  function cardFor(row) {
+    if ($(".mcard", row)) return;
+    var c = el("div", "mcard mo-card");
+    var id = txt(row, '[data-col="id"] .idline .t') || txt(row, '[data-col="id"] .t');
+    var dt = $$('[data-col="date"] .t', row).filter(function (t) { return !t.classList.contains("t--muted"); });
+    var date = dt.length ? txt(dt[0]) + (dt[1] ? " · " + txt(dt[1]) : "") : "";
+    var top = el("div", "mcard__top", '<span class="mcard__id">' + esc(id) + "</span>");
+    var tag = cl($('[data-col="id"] .tag', row)); if (tag) top.appendChild(tag);
+    top.appendChild(el("span", "mcard__date", esc(date)));
+    c.appendChild(top);
+
+    var vname = txt(row, ".vehicle__name");
+    var veh = el("div", "mcard__veh");
+    var vt = el("div", "mcard__vt", "<b>" + esc(vname || "—") + "</b>");
+    var sub = el("span", "mcard__sub", "<span>" + esc(txt(row, ".vtype") || "Other") + "</span>");
+    var prov = cl($('[data-col="id"] .idprov', row));
+    if (prov) { sub.appendChild(el("span", "", "·")); sub.appendChild(prov); }
+    vt.appendChild(sub); veh.appendChild(vt);
+    var ph = cl($(".vehicle__photo", row)); if (ph) { ph.removeAttribute("width"); ph.removeAttribute("height"); veh.appendChild(ph); }
+    else veh.appendChild(el("span", "mo-car-ph", img("nTruck.svg")));
+    c.appendChild(veh);
+
+    var box = el("div", "mcard__box"); var route = cl($('[data-col="route"] .route', row)); if (route) box.appendChild(route);
+    c.appendChild(box);
+
+    // shipper · notes · contact tiles
+    var sh = el("div", "mo-ship");
+    sh.appendChild(el("b", "mo-ship__n", esc(txt(row, '[data-col="shipper"] .contact-cell__name') || "—")));
+    var cs = $$('[data-col="notes"] .counter', row);
+    var nt = el("span", "mo-ship__notes");
+    cs.forEach(function (x) { nt.appendChild(cl(x)); });
+    sh.appendChild(nt);
+    var an = cl($('[data-col="notes"] .add-note', row));
+    if (an) { an.classList.add("mo-tile"); sh.appendChild(an); }
+    var vals = $$('[data-col="contacts"] .contact-cell__val', row).map(function (v) { return txt(v); });
+    var pv = vals.filter(function (v) { return v.indexOf("@") < 0; })[0], ev = vals.filter(function (v) { return v.indexOf("@") > -1; })[0];
+    var tile = function (kind, v) {
+      var b = el("button", "mo-tile mo-tile--" + kind, kind === "sms" ? I.phone : I.mail);
+      b.type = "button"; b.setAttribute("data-open", kind);
+      b.setAttribute("aria-label", (kind === "sms" ? "Send SMS to " : "Send email to ") + (v || ""));
+      if (!v) b.disabled = true;
+      return b;
+    };
+    sh.appendChild(tile("sms", pv)); sh.appendChild(tile("email", ev));
+    c.appendChild(sh);
+
+    // ship + pricing box
+    var bx = el("div", "mo-sp");
+    var tf = $('[data-col="tf"]', row);
+    if (tf) {
+      var tt = $$(".t", tf).map(function (t) { return txt(t); }).filter(Boolean);
+      var pk = tt[0] && tt[0] !== "—" ? tt[0] : "", dl = tt[1] && tt[1] !== "—" ? tt[1] : "";
+      bx.appendChild(el("div", "mo-sp__row", '<span><i>Pickup</i><b class="' + (pk ? "" : "is-empty") + '">' + esc(pk || "—") + '</b></span><span><i>Delivery</i><b class="' + (dl ? "" : "is-empty") + '">' + esc(dl || "—") + "</b></span>"));
+    } else {
+      var est = txt(row, '[data-col="est"] .t');
+      bx.appendChild(el("div", "mo-sp__row", "<span><i>Est. ship</i><b>" + esc(est || "—") + "</b></span>"));
+    }
+    var car = $('[data-col="carrier"]', row);
+    if (car) {
+      var cn = txt(car, ".o-carrier__name") || "", cp = txt(car, ".contact-cell__val");
+      if (!cn) { var t0 = txt(car); cn = t0 && t0 !== "—" ? t0 : ""; }
+      bx.appendChild(el("div", "mo-sp__row mo-sp__car", "<span><i>Carrier</i><b>" + esc(cn || "No Carrier") + "</b></span>" + (cp ? '<em>' + esc(cp) + "</em>" : "")));
+    }
+    var tr = moneyCell(row, "tariff"), dp = moneyCell(row, "deposit"), cy = moneyCell(row, "cpay");
+    if (tr || dp || cy) {
+      var m = function (k, v) { return "<span><i>" + k + '</i><b class="' + (v ? "" : "is-empty") + '">' + esc(v || "—") + "</b></span>"; };
+      bx.appendChild(el("div", "mo-sp__row mo-sp__money", m("Tariff", tr) + m("Deposit", dp) + m("Carrier pay", cy)));
+    } else bx.appendChild(el("div", "mo-sp__row mo-sp__none", "Pricing not set"));
+    c.appendChild(bx);
+    row.appendChild(c);
+  }
+  function buildCards() { $$(".table__grid > .row[data-oid]", OL).forEach(cardFor); }
+  function rebuildCards() { $$(".mo-card", OL).forEach(function (c) { c.remove(); }); buildCards(); }
+
+  // header: filter row, FAB, summary
+  (function () {
+    var tabs = $(".page-header .tabs", OL);
+    var fb = el("button", "mfilter", SVG.user + '<span class="mfilter__l"></span>' + SVG.chevD);
+    fb.type = "button"; fb.setAttribute("aria-haspopup", "dialog");
+    var lbl = $(".mfilter__l", fb), src = $('[data-dd="o-assignee"] [data-dd-label]', OL);
+    var setLabel = function () { lbl.textContent = src ? txt(src) : "My Orders"; };
+    setLabel();
+    if (src) new MutationObserver(setLabel).observe(src, { childList: true, characterData: true, subtree: true });
+    if (tabs) tabs.after(fb); else $(".page-header", OL).appendChild(fb);
+    var names = $$('[data-menu="o-assignee"] .menu__item', OL).map(function (i) { return i.dataset.value; });
+    fb.addEventListener("click", function () {
+      L.openAssignee({
+        names: names, def: "My Orders", get: function () { return src ? txt(src) : "My Orders"; },
+        set: function (v) { var it = $('[data-menu="o-assignee"] .menu__item[data-value="' + v.replace(/"/g, '\\"') + '"]', OL); if (it) it.click(); }
+      });
+    });
+    var fab = el("button", "mo-fab mlq-only", I.plus + "<span>Create new</span>");
+    fab.type = "button";
+    fab.addEventListener("click", function () { M.openSheet(L.createSheet); });
+    OL.appendChild(fab);
+    // bulk Email opens the e-mail composer like SMS does
+    var em = $$('.bulk-bar[data-bulk="orders"] .bar-btn').filter(function (b) { return txt(b, ".bar-label") === "Email"; })[0];
+    if (em && !em.hasAttribute("data-open")) em.setAttribute("data-open", "email");
+  })();
+  buildCards();
+  $$(".table__grid", OL).forEach(function (g) {
+    new MutationObserver(function () { clearTimeout(g._t); g._t = setTimeout(buildCards, 30); }).observe(g, { childList: true, subtree: false });
+  });
+
+  /* =====================================================================
+     DETAIL (080–089)
+     ===================================================================== */
+  var nav = L.makeNav(OD, { back: function () { location.hash = "orders"; } });
+  var editB = L.navBtn("mnav__btn--pri", SVG.edit, "Edit"), moreB = L.navBtn("", SVG.dots, "More actions");
+  nav.node.appendChild(editB); nav.node.appendChild(moreB);
+  editB.addEventListener("click", function () { var a = $(".o-actions > a.btn-primary", OD); if (a) a.click(); });
+
+  // section tabs (Info · Payments · Route · Notes)
+  var stabs = el("div", "mo-stabs mlq-only", "");
+  var STABS = [["Info", function () { return $(".ld-profile", OD); }], ["Payments", function () { return headSec("Payments", ".ld-list"); }],
+    ["Route", function () { return $(".ld-route", OD); }], ["Notes", function () { return headSec("Internal notes", ".ld-block"); }]];
+  function headSec(t, sel) { return $$(sel, OD).filter(function (s) { var h = $(".ld-list__head, .ld-head__t", s); return h && txt(h) === t; })[0] || null; }
+  var stTrack = el("div", "mo-stabs__track");
+  STABS.forEach(function (s, i) {
+    var b = el("button", "mo-stabs__t" + (i ? "" : " is-on"), esc(s[0])); b.type = "button";
+    b.addEventListener("click", function () {
+      var t = s[1](); if (!t) return;
+      var y = i === 0 ? 0 : t.getBoundingClientRect().top + window.scrollY - (nav.node.offsetHeight + stabs.offsetHeight + 12);
+      stLock = Date.now(); paintTabs(i); window.scrollTo({ top: y, behavior: "smooth" });
+    });
+    stTrack.appendChild(b);
+  });
+  stabs.appendChild(stTrack);
+  nav.node.after(stabs);
+  function navH() { if (nav.node.offsetHeight) root.style.setProperty("--mo-nav-h", nav.node.offsetHeight + "px"); }
+  var stLock = 0;
+  function paintTabs(n) { $$(".mo-stabs__t", stabs).forEach(function (b, j) { b.classList.toggle("is-on", j === n); }); }
+  window.addEventListener("scroll", function () {
+    if (OD.hidden || !isM() || Date.now() - stLock < 700) return;
+    var line = nav.node.offsetHeight + stabs.offsetHeight + 40, on = 0;
+    STABS.forEach(function (s, i) { var t = s[1](); if (t && t.getBoundingClientRect().top <= line) on = i; });
+    paintTabs(on);
+  }, { passive: true });
+
+  // previous / next order (phone copies of the header arrows)
+  var acts = $(".o-actions", OD);
+  var sqs = $$(".o-sq", acts);
+  var stepsBox = el("div", "mo-steps mlq-only");
+  sqs.forEach(function (sq, i) {
+    var b = el("button", "m-ldstep", i ? SVG.next : SVG.prev); b.type = "button";
+    b.setAttribute("aria-label", i ? "Next order" : "Previous order");
+    b.addEventListener("click", function () {
+      var ids = $$('[data-view="orders"] [data-otab-panel="all"] .row.is-link').map(function (r) { return r.dataset.href.slice(1); });
+      var cur = ids.indexOf("order/" + (hashBase().split("/")[1] || "")), nx = ids[cur + (i ? 1 : -1)];
+      if (nx) location.hash = nx; else sq.click();
+    });
+    stepsBox.appendChild(b);
+  });
+  $(".lead-header", OD).appendChild(stepsBox);
+  function syncSteps() {
+    var ids = $$('[data-view="orders"] [data-otab-panel="all"] .row.is-link').map(function (r) { return r.dataset.href.slice(1); });
+    var cur = ids.indexOf("order/" + (hashBase().split("/")[1] || ""));
+    var bs = $$("button", stepsBox); if (bs[0]) bs[0].disabled = cur <= 0; if (bs[1]) bs[1].disabled = cur < 0 || cur >= ids.length - 1;
+  }
+
+  // header tag helper (Ready / Hold / Posted / Delivered …)
+  var tagEl = $(".lead-title-row .tag", OD), tag0 = null;
+  function setTag(label, kind) {
+    if (!tagEl) return;
+    if (tag0 === null) tag0 = { t: tagEl.textContent, c: tagEl.className };
+    tagEl.textContent = label; tagEl.className = tag0.c.replace(/\bmo-tag--\w+/g, "") + (kind ? " mo-tag--" + kind : "");
+  }
+  function resetTag() { if (tag0 && tagEl) { tagEl.textContent = tag0.t; tagEl.className = tag0.c; } }
+
+  // primary action per state (Figma 080 / 080.1)
+  function btnText(t) { return $$("button", acts).filter(function (b) { return b.classList.contains("btn-secondary") && txt(b).indexOf(t) === 0; })[0]; }
+  var bDispatch = $('[data-open="o-dispatch"]', acts), bPay = btnText("Create payment"), bCancel = btnText("Cancel dispatch"), bDeliv = btnText("Mark as delivered");
+  if (bDispatch) bDispatch.classList.add("mo-a-dsp");
+  if (bPay) bPay.classList.add("mo-a-pay");
+  if (bCancel) bCancel.classList.add("mo-a-cancel");
+  if (bDeliv) bDeliv.classList.add("mo-a-deliv");
+  var delivered = false;
+  if (bDeliv) bDeliv.addEventListener("click", function () {
+    if (!isM()) return;
+    delivered = true; OD.classList.add("mo-is-delivered");
+    setTag("Delivered", "green");
+    toast("Order #" + curId() + " marked as delivered");
+  });
+  if (bCancel) bCancel.addEventListener("click", function () { delivered = false; OD.classList.remove("mo-is-delivered"); resetTag(); });
+
+  // Post to CD & SLB → sheet (082) → Posted (082.1)
+  var postSheet = M.makeSheet("m-acts mo-post", "Post to");
+  var postList = el("div", "m-acts__list"); postSheet.appendChild(postList);
+  var postBtn = $(".o-post", acts);
+  if (postBtn) postBtn.addEventListener("click", function (e) {
+    if (!isM()) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    postList.innerHTML = "";
+    $$('[data-menu="o-post"] .menu__item', OD).forEach(function (it, i) {
+      var label = txt(it, ".menu__label");
+      var lg = $('[data-modal="pricing"] .brand-logo') || $(".brand-logo");
+      var b = el("button", "m-acts__it", (i < 2 && lg ? '<img src="' + lg.src + '" alt="">' : I.pin) + "<span>" + esc(label) + "</span>");
+      b.type = "button";
+      b.addEventListener("click", function () {
+        M.closeSheet(postSheet);
+        setTag("Posted", "blue");
+        var where = label.replace(/^Post to\s*/, "").replace("CD", "Central Dispatch");
+        setTimeout(function () { toast("Order #" + curId() + " posted to " + where); }, 220);
+      });
+      postList.appendChild(b);
+    });
+    M.openSheet(postSheet);
+  }, true);
+
+  // More actions (081) and what each item does (081.1–081.11)
+  var actSheet = M.makeSheet("m-acts", "Actions");
+  var actList = el("div", "m-acts__list"); actSheet.appendChild(actList);
+  var held = false;
+  // change history (081.8 / 081.9) — the same status trail the app shows for converted records
+  var hSheet = M.makeSheet("m-hist mo-hist", "Change history");
+  hSheet.appendChild(el("div", "mo-hist__list",
+    '<p class="mo-hist__meta">2 changes recorded by 1 user</p><p class="mo-hist__m">October 2026</p>' +
+    [["6 days ago", "Quote", "Orders list"], ["8 days ago", "New", "Quote"]].map(function (h) {
+      return '<div class="mo-hist__it"><i>MF</i><div><div class="mo-hist__top"><b>Muzaffar Fozilov</b><span>' + h[0] + '</span></div><div class="mo-hist__ch"><span>Status</span>' + esc(h[1]) + '<span>→</span><b>' + esc(h[2]) + "</b></div></div></div>";
+    }).join("")));
+  // delete confirm (081.10)
+  var dSheet = M.makeSheet("mo-confirm", "Delete order?");
+  var dTxt = el("p", "mo-confirm__t", ""); dSheet.appendChild(dTxt);
+  var dFoot = el("div", "m-sheet-foot", '<button class="m-btn m-btn--sec" type="button" data-mo-cancel>Cancel</button><button class="m-btn mo-btn--danger" type="button" data-mo-del>Delete</button>');
+  dSheet.appendChild(dFoot);
+  $("[data-mo-cancel]", dFoot).addEventListener("click", function () { M.closeSheet(dSheet); });
+  $("[data-mo-del]", dFoot).addEventListener("click", function () {
+    var id = curId();
+    M.closeSheet(dSheet);
+    location.hash = "orders";
+    setTimeout(function () {
+      $$('.row[data-oid="' + id + '"]', OL).forEach(function (r) { r.classList.add("mo-deleted"); });
+      $$(".summary__count", OL).forEach(function (n) { var v = parseInt(n.textContent, 10); if (v > 0 && !n.dataset.moDel) { n.textContent = v - 1; n.dataset.moDel = "1"; } });
+      toast("Order #" + id + " deleted");
+    }, 450);
+  });
+  // e-mail composer reused for "Dispatch via Email" (081.3)
+  var emModal = $('[data-modal="email"]'), emDispatch = false, emTitle = emModal && $(".modal__title", emModal), emTitle0 = emTitle ? emTitle.textContent : "";
+  var emTo = null;
+  if (emModal) {
+    var emBody = $(".modal__body", emModal), tpl = emBody && emBody.firstElementChild;
+    var toL = el("p", "em-label mo-em-to mlq-only", "To"), toI = el("span", "field-input mo-em-to mlq-only", '<input type="email" placeholder="Carrier email" aria-label="Carrier email">');
+    emTo = { set hidden(v) { toL.hidden = v; toI.hidden = v; var sb = $(".modal__sub", emModal); if (sb) sb.classList.toggle("mo-hide", !v); } };
+    emTo.hidden = true;
+    if (tpl) { tpl.after(toI); tpl.after(toL); }
+    var sendB = $("#email-send", emModal);
+    if (sendB) sendB.addEventListener("click", function () {
+      if (!isM() || !emDispatch) return;
+      setTimeout(function () { toast("Dispatch email sent to the carrier"); }, 250);
+    });
+    new MutationObserver(function () {
+      if (emModal.hidden && emDispatch) { emDispatch = false; emTo.hidden = true; if (emTitle) emTitle.textContent = emTitle0; }
+    }).observe(emModal, { attributes: true, attributeFilter: ["hidden"] });
+  }
+  function openEmailDispatch() {
+    var opener = $('[data-view="order"] .ld-chan__btn[data-open="email"]') || $('button[data-open="email"]');
+    if (!opener) return;
+    opener.click();
+    setTimeout(function () { emDispatch = true; if (emTitle) emTitle.textContent = "Dispatch via Email"; if (emTo) emTo.hidden = false; }, 0);
+  }
+
+  function openActions() {
+    actList.innerHTML = "";
+    $$('[data-menu="o-more"] > .menu__item', OD).forEach(function (it) {
+      var label = txt(it, ".menu__label");
+      var shown = label === "On hold" && held ? "Remove hold" : label;
+      var b = el("button", "m-acts__it" + (it.classList.contains("menu__item--danger") ? " is-danger" : ""));
+      b.type = "button";
+      var im = $("img", it); if (im) b.appendChild(cl(im));
+      b.appendChild(el("span", "", esc(shown)));
+      b.addEventListener("click", function () {
+        M.closeSheet(actSheet);
+        var id = curId();
+        setTimeout(function () {
+          switch (label) {
+            case "Dispatch via Email": openEmailDispatch(); break;
+            case "Duplicate": toast("Order #" + id + " duplicated"); break;
+            case "On hold":
+              held = !held;
+              if (held) { setTag("Hold", "orange"); toast("Order #" + id + " put on hold"); } else { resetTag(); toast("Hold removed from order #" + id); }
+              break;
+            case "History": M.openSheet(hSheet); break;
+            case "Delete": dTxt.textContent = "Order #" + id + " will be deleted. This action can’t be undone."; M.openSheet(dSheet); break;
+            default: it.click();
+          }
+        }, 200);
+      });
+      actList.appendChild(b);
+    });
+    M.openSheet(actSheet);
+  }
+  moreB.addEventListener("click", openActions);
+
+  // route: Show map lives inside the Route card (Figma 080 / 080.2)
+  var mapCard = $(".o-mapcard", OD), routeBody = $(".ld-route .ld-body", OD);
+  var mapBtn = mapCard && $("[data-o-map-toggle]", mapCard);
+  if (routeBody && mapBtn) {
+    var mb = el("button", "mo-showmap mlq-only", img("map28.svg") + "<span>Show map</span>"); mb.type = "button";
+    routeBody.appendChild(mb);
+    var sync = function () { var on = $("[data-o-map]", mapCard).classList.contains("is-open"); OD.classList.toggle("mo-map-on", on); $("span", mb).textContent = on ? "Hide map" : "Show map"; };
+    mb.addEventListener("click", function () { mapBtn.click(); sync(); });
+    mapBtn.addEventListener("click", function () { setTimeout(sync, 0); });
+  }
+
+  // "Payments" table → Payment history cards (084.5)
+  var payBlock = $$(".ld-block", OD).filter(function (s) { var h = $(".ld-head__t", s); return h && txt(h) === "Payments"; })[0];
+  if (payBlock) {
+    var ht = $(".ld-head__t", payBlock);
+    ht.innerHTML = '<span class="m-lbl-full">Payments</span><span class="m-lbl-short mlq-only">Payment history</span>';
+    var pt = $(".mini-table", payBlock); if (pt) pt.setAttribute("data-m-own", "");
+    $$(".o-head-btns button", payBlock).forEach(function (b) {
+      b.addEventListener("click", function () { if (isM()) toast("Payments exported to " + txt(b)); });
+    });
+  }
+  function payCards() {
+    if (!payBlock) return;
+    $$(".mini-table__row", payBlock).forEach(function (r) {
+      if (r.classList.contains("mini-table__row--head") || $(".mpay", r) || r.getAttribute("role") !== "row" || $(".mini-table__th", r)) return;
+      var td = $$(".mini-table__td", r).map(function (c) { return txt(c); });
+      if (!td.length) return;
+      var c = el("div", "mpay");
+      c.innerHTML = '<div class="mpay__top"><b>' + esc(td[0]) + '</b><span class="mpay__chip">' + esc(td[4] || "—") + "</span></div>" +
+        '<div class="mpay__kv"><span>Direction</span><b>' + esc(td[3] || "—") + '</b></div><div class="mpay__kv"><span>Shipper</span><b>' + esc(td[2] || "—") + '</b></div><div class="mpay__kv"><span>Amount paid</span><b>' + esc(td[1] || "—") + "</b></div>";
+      r.appendChild(c);
+    });
+  }
+  if (payBlock) new MutationObserver(payCards).observe(payBlock, { childList: true, subtree: true });
+
+  // copy → "Phone number copied" (080.4)
+  OD.addEventListener("click", function (e) {
+    var b = e.target.closest(".ld-copy"); if (!b || !isM()) return;
+    var ch = b.closest(".ld-chan"); if (ch) { ch.classList.add("mo-copied"); setTimeout(function () { ch.classList.remove("mo-copied"); }, 1600); }
+    toast(b.getAttribute("data-copied") || "Copied");
+  });
+
+  // note saved → stays visible as a "Sent" note; carrier requests empty state keeps the dashed box
+  L.hooks.push(function (v) {
+    if (v !== "order") return;
+    nav.title.textContent = curId();
+    L.decorateDetail(OD);
+    payCards(); syncSteps(); setTimeout(navH, 0);
+    if (!isM()) return;
+    paintTabs(0);
+  });
+
+  /* ---------- dialogs opened from Orders ---------- */
+  // pricing on an order (088 / 088.2): Central Dispatch is not connected, Carlink Price still answers
+  (function () {
+    var pm = $('[data-modal="pricing"]'); if (!pm) return;
+    var tabs = $(".tabs", pm); if (!tabs) return;
+    tabs.addEventListener("click", function (e) {
+      var b = e.target.closest(".tab"); if (!b) return;
+      pm.classList.toggle("mo-cl", $$(".tab", tabs).indexOf(b) === 1);
+    });
+    document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("[data-pricing]")) pm.classList.remove("mo-cl"); }, true);
+    // the Carlink Price card on an order shows the order's own lane (Figma 088.2)
+    var cl = $('[data-ppanel="cl"]', pm);
+    if (cl) new MutationObserver(function () {
+      if (!pm.classList.contains("oh-cd-off") || !isM()) return;
+      var r = $(".cp-route", cl); if (!r || r.dataset.mo) return;
+      var stops = $$('[data-view="order"] .ld-route .ld-rrow', document).map(function (x) { var s = $$(".ld-stop span, .ld-stop", x)[0]; return s ? txt(s).replace(/\s*\d{5}$/, "") : ""; });
+      var ims = $$("img", r);
+      if (stops[0] && stops[1] && ims.length >= 2) {
+        r.dataset.mo = "1";
+        var nodes = Array.prototype.slice.call(r.childNodes);
+        var texts = nodes.filter(function (n) { return n.nodeType === 3 && n.textContent.trim(); });
+        if (texts[0]) texts[0].textContent = stops[0];
+        if (texts[1]) texts[1].textContent = stops[1];
+        var mi = $(".cp-route__mi", r); if (mi) mi.hidden = true;
+      }
+    }).observe(cl, { childList: true, subtree: true });
+  })();
+  // carrier matches (083): one meta line per carrier — On-lane · Origin · Last run
+  (function () {
+    var cm = $('[data-modal="o-carriers"]'); if (!cm) return;
+    var heads = $$(".o-cr--head .o-cr__num", cm).map(function (h) { return txt(h); });
+    $$(".o-cr:not(.o-cr--head)", cm).forEach(function (r) {
+      if ($(".o-cr__meta", r)) return;
+      var n = $$(".o-cr__num", r).map(function (x) { return txt(x); });
+      var m = el("span", "o-cr__meta mlq-only", n.map(function (v, i) { return "<span><i>" + esc(heads[i] || "") + "</i>" + esc(v) + "</span>"; }).join(""));
+      var ct = $(".o-cr__contact", r); r.insertBefore(m, ct || null);
+    });
+  })();
+  // Create payment: invalid amount keeps the red ring (084.4) — handled by the app; nothing to add.
+  // Dispatch wizard: success toast already comes from the app (.upd-toast) — styled as the Figma toast in CSS.
+
+  /* =====================================================================
+     FORMS — New order hub + steps (Figma New order 01–04, step screens) · Edit order (091)
+     ===================================================================== */
+  if (ON) (function () {
+    var main = ON, form = $(".nl-cols", main); if (!form) return;
+    var STEPS = ["shipper", "contacts", "vehicle", "shipping", "dispatch", "route", "pricing"];
+    var SEC = [
+      { k: "shipper", t: "Shipper information", ico: "nUser.svg" },
+      { k: "contacts", t: "Contacts", ico: "ldNotes.svg" },
+      { k: "vehicle", t: "Vehicle information", ico: "nTruck.svg" },
+      { k: "shipping", t: "Shipping information", ico: "ldSchedule.svg" },
+      { k: "dispatch", t: "Dispatch info", ico: "nTruck.svg", optional: true },
+      { k: "route", t: "Route", ico: "nMap.svg" },
+      { k: "pricing", t: "Pricing information", ico: "nMoney.svg" },
+      { k: "map", t: "Route Map", ico: "nMap.svg" }
+    ];
+    function blocksOf(k) {
+      var bs = $$(".nl-block", form);
+      var has = function (s) { return bs.filter(function (b) { return !!$(s, b); }); };
+      switch (k) {
+        case "shipper": return has('[name="first"]');
+        case "contacts": return has('[name="p_contact"]');
+        case "vehicle": return has("[data-vehicle]");
+        case "shipping": return has('[name="firstavail"]');
+        case "dispatch": return has('[name="driver"]');
+        case "route": return has('[name="o_city"], [name="d_city"]');
+        case "pricing": return has('[name="carrier_pay"]');
+        case "map": return bs.filter(function (b) { return !!$("[data-map], .nl-map, [data-map-toggle]", b) && !$("[name]", b); });
+      }
+      return [];
+    }
+    function fieldsOf(blocks) { return blocks.reduce(function (a, b) { return a.concat($$("[data-field]", b)); }, []); }
+    function ctrl(f) { return $("input, select, textarea", f); }
+    function editable(c) { return c && !c.readOnly && !c.disabled && c.type !== "checkbox"; }
+    function val(n) { var e = $('[name="' + n + '"]', form); return e ? e.value.trim() : ""; }
+    var step = null;
+    var navF = L.makeNav(main, { center: true, back: function () { if (step) exitStep(); else location.hash = "orders"; } });
+    var hub = el("div", "mhub mlq-only"); form.insertBefore(hub, form.firstChild);
+    var dots = STEPS.map(function () { return "<i></i>"; }).join("");
+    var foot = el("div", "mstep-foot mlq-only", '<button class="m-btn" type="button" data-m-continue>Continue<span class="mstep-dots" aria-hidden="true">' + dots + "</span></button>");
+    main.appendChild(foot);
+    var cards = {};
+    SEC.forEach(function (s, i) {
+      var bl = blocksOf(s.k); if (!bl.length) return;
+      bl.forEach(function (b) { b.style.setProperty("--o", i + 1); });
+      var c = el("div", "mhub__card"); c.setAttribute("role", "button"); c.tabIndex = 0; c.style.setProperty("--o", i + 1); c.dataset.sec = s.k;
+      c.innerHTML = '<div class="mhub__h">' + img(s.ico) + "<span>" + esc(s.t) + '</span><span class="mhub__act"></span></div><div class="mhub__body"></div><div class="mhub__st"></div>';
+      hub.appendChild(c);
+      cards[s.k] = { card: c, blocks: bl, def: s };
+      var go = function () { enterStep(s.k === "map" ? "route" : s.k); };
+      c.addEventListener("click", function (e) {
+        if (e.target.closest(".mhub__clr")) { e.stopPropagation(); clearSec(s.k); return; }
+        if (e.target.closest(".mo-hub-btns button")) { e.stopPropagation(); return; }
+        go();
+      });
+      c.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    });
+    function secState(k) {
+      var c = cards[k]; if (!c) return { any: false, done: true, bad: false };
+      var fs = fieldsOf(c.blocks);
+      var any = fs.some(function (f) { var x = ctrl(f); return editable(x) && x.tagName !== "SELECT" && x.value.trim() !== ""; });
+      var done = fs.every(function (f) { var x = ctrl(f); return !x || !x.hasAttribute("data-req") || x.value.trim() !== ""; });
+      var bad = fs.some(function (f) { return f.classList.contains("is-error"); });
+      return { any: any, done: done, bad: bad };
+    }
+    function chips(list) { return '<div class="mhub__chips">' + list.filter(Boolean).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</div>"; }
+    function money(n) { var v = parseFloat(String(n || "").replace(/[^0-9.]/g, "")); return isFinite(v) && v ? "$" + v.toLocaleString("en-US") : ""; }
+    function summary(k) {
+      if (k === "route") {
+        var o = [val("o_city"), val("o_state")].filter(Boolean).join(", "), d = [val("d_city"), val("d_state")].filter(Boolean).join(", ");
+        return '<div class="mhub__route"><span>' + esc(o || "—") + "</span>" + SVG.to + "<span>" + esc(d || "—") + "</span></div>";
+      }
+      if (k === "shipper") return chips([[val("first"), val("last")].filter(Boolean).join(" "), val("phone"), val("phone2"), val("email")]);
+      if (k === "contacts") return chips([val("p_contact") ? "Pickup · " + val("p_contact") : "", val("d_contact") ? "Drop off · " + val("d_contact") : "", val("p_cell"), val("d_cell")]);
+      if (k === "vehicle") {
+        var out = [];
+        $$("[data-vehicle]", form).forEach(function (v) {
+          var g = function (n) { var e = $('[name="' + n + '"]', v); return e ? e.value.trim() : ""; };
+          out.push([g("year"), g("make"), g("model")].filter(Boolean).join(" "), g("type"), g("tariff") ? "Tariff " + money(g("tariff")) : "", g("deposit") ? "Deposit " + money(g("deposit")) : "");
+        });
+        return chips(out);
+      }
+      if (k === "shipping") {
+        var seg = $(".nl-seg__btn.is-active", cards.shipping.blocks[0]); var n = val("notes");
+        return chips([val("firstavail") ? "1st avail " + val("firstavail") : "", seg ? txt(seg) : ""]) + (n ? '<div class="mhub__note">' + esc(n) + "</div>" : "");
+      }
+      if (k === "dispatch") return chips([val("driver"), val("driver_phone")]);
+      if (k === "pricing") {
+        var t = $('[data-o-total="tariff"]', form), dp = $('[data-o-total="deposit"]', form);
+        return '<div class="mo-hub-kv"><span>Total tariff</span><b>' + esc(t ? txt(t) : "$0.00") + '</b></div><div class="mo-hub-kv"><span>Total deposit</span><b>' + esc(dp ? txt(dp) : "$0.00") + "</b></div>" +
+          (val("carrier_pay") ? '<div class="mo-hub-kv"><span>Carrier pay</span><b>' + esc(money(val("carrier_pay"))) + "</b></div>" : "");
+      }
+      return "";
+    }
+    function tariffSum() { return $$('[name="tariff"]', form).reduce(function (a, i) { return a + (parseFloat(i.value) || 0); }, 0); }
+    function render() {
+      STEPS.forEach(function (k) {
+        var c = cards[k]; if (!c) return;
+        var s = secState(k), show = s.any || (k === "pricing" && tariffSum() > 0);
+        $(".mhub__body", c.card).innerHTML = show ? summary(k) : "";
+        var st = $(".mhub__st", c.card);
+        st.textContent = show ? (s.bad ? "Required fields are missing" : "") : (s.bad ? "Not filled — required section" : "Not filled");
+        st.hidden = !st.textContent;
+        c.card.classList.toggle("is-bad", s.bad);
+        $(".mhub__act", c.card).innerHTML = show && k !== "pricing" ? '<button class="mhub__clr" type="button" aria-label="Clear ' + esc(c.def.t) + '"><i>' + SVG.xs + "</i></button>" : SVG.chevR;
+      });
+      var mp = cards.map;
+      if (mp) {
+        var ron = secState("route").done && !!val("o_city") && !!val("d_city");
+        mp.card.hidden = ron;
+        mp.blocks.forEach(function (b) { b.classList.toggle("m-on", ron); b.classList.toggle("m-hubblock", ron); });
+        $(".mhub__st", mp.card).textContent = "Not filled"; $(".mhub__act", mp.card).innerHTML = SVG.chevR;
+      }
+    }
+    function clearSec(k) {
+      var c = cards[k]; if (!c) return;
+      if (k === "vehicle") $$("[data-vehicle]", form).slice(1).forEach(function (v) { v.remove(); });
+      fieldsOf(c.blocks).forEach(function (f) {
+        var x = ctrl(f); if (!editable(x) || x.tagName === "SELECT") return;
+        x.value = ""; f.classList.remove("is-error"); var er = $(".nl-error", f); if (er) { er.hidden = true; er.textContent = ""; }
+        x.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      render();
+    }
+    var TITLES = { shipper: "Shipper information", contacts: "Contacts", vehicle: "Vehicle information", shipping: "Shipping information", dispatch: "Dispatch info", route: "Route", pricing: "Pricing information" };
+    function enterStep(k) {
+      if (!cards[k]) return;
+      $$(".nl-block.m-step", form).forEach(function (b) { b.classList.remove("m-step"); });
+      step = k; cards[k].blocks.forEach(function (b) { b.classList.add("m-step"); });
+      root.classList.add("mv-step");
+      var i = STEPS.indexOf(k);
+      $$(".mstep-dots i", foot).forEach(function (d, j) { d.classList.toggle("is-on", j === i); });
+      navF.title.textContent = TITLES[k];
+      window.scrollTo(0, 0);
+    }
+    function exitStep() {
+      $$(".nl-block.m-step", form).forEach(function (b) { b.classList.remove("m-step"); });
+      step = null; root.classList.remove("mv-step"); navF.title.textContent = "New order"; render(); window.scrollTo(0, 0);
+    }
+    function validateStep() {
+      var bad = [];
+      fieldsOf(cards[step].blocks).forEach(function (f) {
+        var x = ctrl(f); if (!x) return;
+        var msg = "";
+        if (x.hasAttribute("data-req") && !x.value.trim()) msg = (f.dataset.label || "This field") + " is required";
+        else if (x.name === "email" && x.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.value)) msg = "Enter a valid email address";
+        f.classList.toggle("is-error", !!msg);
+        var er = $(".nl-error", f); if (er) { er.hidden = !msg; er.textContent = msg; }
+        if (msg) bad.push(x);
+      });
+      return bad;
+    }
+    $("[data-m-continue]", foot).addEventListener("click", function () {
+      if (!step) return;
+      var bad = validateStep();
+      if (bad.length) { bad[0].focus({ preventScroll: true }); bad[0].closest("[data-field]").scrollIntoView({ block: "center", behavior: "smooth" }); return; }
+      var i = STEPS.indexOf(step), nxt = null;
+      for (var j = i + 1; j < STEPS.length; j++) { var d = cards[STEPS[j]]; if (d && !d.def.optional && !secState(STEPS[j]).done) { nxt = STEPS[j]; break; } }
+      if (nxt) enterStep(nxt); else exitStep();
+    });
+    form.addEventListener("input", function () { clearTimeout(render.t); render.t = setTimeout(render, 60); });
+    form.addEventListener("change", function () { clearTimeout(render.t); render.t = setTimeout(render, 60); });
+    form.addEventListener("click", function (e) { if (e.target.closest(".nl-seg__btn, [data-veh-remove], [data-veh-add], .nl-add, [data-o-use-shipper]")) setTimeout(render, 250); });
+    main.addEventListener("click", function (e) {
+      if (!e.target.closest(".nl-save") || !isM()) return;
+      setTimeout(function () { render(); if ($(".nl-field.is-error", form)) window.scrollTo({ top: 0, behavior: "smooth" }); }, 0);
+    }, true);
+    L.hooks.push(function (v) {
+      if (v === "order-new") { if (!step) navF.title.textContent = "New order"; setTimeout(render, 0); }
+      else if (step) { step = null; $$(".nl-block.m-step", form).forEach(function (b) { b.classList.remove("m-step"); }); root.classList.remove("mv-step"); }
+    });
+    render();
+  })();
+
+  if (OE) (function () {
+    var navE = L.makeNav(OE, { back: function () { var id = (hashBase().split("/")[1] || ""); location.hash = id ? "order/" + id : "orders"; } });
+    L.hooks.push(function (v) { if (v === "order-edit") navE.title.textContent = "Edit order · " + ((hashBase().split("/")[1]) || txt(OE, ".crumbs__current")); });
+  })();
+
+  /* ---------- run ---------- */
+  function syncMO() {
+    var v = L.curView();
+    root.classList.toggle("mo-on", isM() && MO_VIEWS.indexOf(v) > -1);
+  }
+  L.hooks.push(syncMO);
+  function late() { rebuildCards(); L.syncView(); }
+  if (document.readyState === "complete") setTimeout(late, 0); else window.addEventListener("load", function () { setTimeout(late, 0); });
+  window.addEventListener("hashchange", function () { setTimeout(syncMO, 0); });
+  L.syncView();
+})();
+</script>
+<!-- m-orders:end -->
 </body></html>
