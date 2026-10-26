@@ -19776,6 +19776,13 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
   .ml-card .mo-sp { padding: 7px 10px; border-radius: 12px; }
   .ml-card .ml-sp b { font-size: 13px; }
   .ml-card .ml-sp b.is-empty { font-weight: 500; color: var(--soft-gray); }
+  .ml-card .ml-spbox { flex-direction: row; align-items: center; gap: 8px; padding: 4px 4px 4px 10px; }
+  .ml-card .ml-spbox .ml-sp { flex: 1 1 auto; min-width: 0; }
+  .ml-pc { display: flex; flex: none; gap: 4px; }
+  .ml-pc__b { position: relative; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: var(--surface); }
+  .ml-pc__b::before { content: ""; position: absolute; inset: -6px -2px; }
+  .ml-pc__b img { width: 16px; height: 16px; }
+  .ml-pc__b:active { transform: scale(.94); }
   .ml-list .pagination { display: flex; flex-direction: column-reverse; align-items: center; gap: 8px; padding: 12px 0 96px !important; border: 0 !important; background: none !important; box-shadow: none !important; }
   .ml-list .pagination .pages { display: flex; gap: 8px; }
   .ml-list .pagination .page-btn { min-width: 44px; height: 44px; border-radius: 12px; background: var(--surface); }
@@ -19796,7 +19803,8 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
   html.mv-step .mlq-form .nl-block.m-step:has([name="o_city"]) > .nl-head { display: none !important; }
   .ml-card .mo-tile img { opacity: .9; }
   html[data-theme="dark"] .ml-card .mo-tile { background: rgba(255,255,255,.08) !important; }
-  html[data-theme="dark"] .ml-card .mo-tile img { filter: brightness(2.2); }
+  html[data-theme="dark"] .ml-card .mo-tile:not(.add-note) img { filter: brightness(0) invert(.82); }
+  html[data-theme="dark"] .ml-card .mo-tile.add-note { background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI2IiBmaWxsPSIjMkIzQTUyIi8+PHBhdGggZD0iTTE4LjY2NjggMTEuNzEzQzE4LjY2NjggMTUuMjMzIDE1LjY4MDIgMTguMDg2MyAxMi4wMDAyIDE4LjA4NjNDMTEuNTY2OCAxOC4wODYzIDExLjEzMzUgMTguMDQ2MyAxMC43MTM1IDE3Ljk2NjNDMTAuNDA2OCAxNy45MTMgMTAuMjUzNSAxNy44Nzk3IDEwLjE0NjggMTcuODk5N0MxMC4wNDAyIDE3LjkxMyA5Ljg4NjgzIDE3Ljk5MyA5LjU4NjgzIDE4LjE1M0M4LjcyMDE2IDE4LjYxMyA3LjcyMDE2IDE4Ljc3MyA2Ljc2NjgzIDE4LjU5M0M3LjEyNjgzIDE4LjE0NjMgNy4zODAxNiAxNy42MTMgNy40OTM1IDE3LjAyNjNDNy41NjAxNiAxNi42NzMgNy4zOTM1IDE2LjMzMyA3LjE0NjgzIDE2LjA3OTdDNi4wMjAxNiAxNC45Mzk3IDUuMzMzNSAxMy40MDYzIDUuMzMzNSAxMS43MTNDNS4zMzM1IDguMTg2MzQgOC4zMjAxNiA1LjMzMzAxIDEyLjAwMDIgNS4zMzMwMUMxNS42ODAyIDUuMzMzMDEgMTguNjY2OCA4LjE4NjM0IDE4LjY2NjggMTEuNzEzWiIgc3Ryb2tlPSIjQThCMkMxIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xMS45OTk4IDkuMzMzMDFWMTMuOTk5N005LjY2NjUgMTEuNjY2M0gxNC4zMzMyIiBzdHJva2U9IiNBOEIyQzEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=") center / 28px 28px no-repeat !important; }
 }
 </style>
 <script>
@@ -19928,7 +19936,21 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
     if (vals.length) { tariff = txt(vals[0]); deposit = vals[1] ? txt(vals[1]) : ""; }
     else { var mi = $$(".c-pricing .mini__input", row); tariff = money(mi[0] && mi[0].value); deposit = money(mi[1] && mi[1].value); }
     var m = function (k, v) { return "<span><i>" + k + '</i><b class="' + (v ? "" : "is-empty") + '">' + esc(v || "—") + "</b></span>"; };
-    c.appendChild(el("div", "mo-sp", '<div class="mo-sp__row ml-sp">' + m("Est. ship", txt(row, ".c-est .t")) + m("Tariff", tariff) + m("Deposit", deposit) + "</div>"));
+    var sp = el("div", "mo-sp ml-spbox", '<div class="mo-sp__row ml-sp">' + m("Est. ship", txt(row, ".c-est .t")) + m("Tariff", tariff) + m("Deposit", deposit) + "</div>");
+    // Central Dispatch price · Carlink price (same buttons as the web Pricing column)
+    var pc = $$(".c-pricing .pcheck__btn", row);
+    if (pc.length) {
+      var pw = el("span", "ml-pc");
+      pc.forEach(function (src) {
+        var b = el("button", "ml-pc__b"); b.type = "button";
+        b.setAttribute("aria-label", src.getAttribute("aria-label") || "Pricing");
+        var im = $("img", src); if (im) b.appendChild(cl(im));
+        b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); src.click(); });
+        pw.appendChild(b);
+      });
+      sp.appendChild(pw);
+    }
+    c.appendChild(sp);
     row.appendChild(c);
   }
   function cardFor(row, kind) {
@@ -20527,6 +20549,97 @@ html[data-theme="dark"] .hm-dp__nav img { filter: invert(1) brightness(1.4); }
   mq2.addEventListener ? mq2.addEventListener("change", syncView) : mq2.addListener(syncView);
   window.addEventListener("hashchange", function () { setTimeout(syncView, 0); });
   syncView();
+})();
+</script>
+<style>
+/* Leads · Pricing details as a bottom sheet (Figma 030.3 Central Dispatch · 030.4 Carlink Price) */
+.ml-pcd { display: none; }
+@media (max-width: 767px) {
+  html.ml-pr [data-modal="pricing"] [data-ppanel="cd"] > .ps-sum, html.ml-pr [data-modal="pricing"] [data-ppanel="cd"] > .ptable { display: none !important; }
+  html.ml-pr [data-modal="pricing"] .ml-pcd { display: flex; flex-direction: column; gap: 12px; }
+  html.ml-pr [data-modal="pricing"] .tabs { flex: none; }
+  html.ml-pr [data-modal="pricing"] .modal__body > * { flex-shrink: 0; }
+  .ml-pcd__veh { display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--soft-gray); }
+  .ml-pcd__vt { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .ml-pcd__vt b { font-size: 16px; font-weight: 600; color: var(--black); }
+  .ml-pcd__vt span, .ml-pcd__mi { flex: none; font-size: 13px; color: var(--light-black); }
+  .ml-pcd__pt { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--black); }
+  .ml-pcd__pt img { width: 14px; height: 14px; }
+  .ml-pcd__row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ml-pcd__lbl { margin: 4px 0 -2px; font-size: 13px; color: var(--light-black); }
+  .ml-pcd__it { display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 14px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--soft-gray); }
+  .ml-pcd__r1 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .ml-pcd__r1 b { font-size: 15px; font-weight: 500; color: var(--black); }
+  .ml-pcd__r1 strong { flex: none; font-size: 18px; font-weight: 600; color: var(--black); }
+  .ml-pcd__r2 { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--light-black); }
+  .ml-pcd__r3 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; padding: 6px 6px 6px 10px; border-radius: 10px; background: rgba(245, 120, 34, .1); font-size: 13px; color: var(--black); }
+  .ml-pcd__r3 .ps-st { flex: none; }
+}
+</style>
+<script>
+/* Leads · Pricing details sheet on a phone; the Carlink price button opens the Carlink Price tab */
+(function () {
+  "use strict";
+  var M = window.CarlinkM, L = window.CarlinkMLQ;
+  if (!M || !L) return;
+  var isM = M.isM, el = M.el, esc = M.esc, txt = L.txt;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var root = document.documentElement;
+  var A = window.__A || {};
+  var ico = function (k) { var s = A["assets/icons/" + k]; return s ? '<img src="' + s + '" alt="">' : ""; };
+  var pm = $('[data-modal="pricing"]'); if (!pm) return;
+  var cd = $('[data-ppanel="cd"]', pm);
+  var wantCl = false;
+
+  function tabs() { return $$(".tabs .tab", pm); }
+  function leadCtx(t) { return !!t.closest('[data-view="leads"], [data-view="lead"]'); }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-pricing]"); if (!b) return;
+    wantCl = /carlink/i.test(b.getAttribute("aria-label") || "");
+    if (isM() && leadCtx(b)) root.classList.add("mo-on", "ml-pr");
+    if (wantCl) setTimeout(function () { var t = tabs()[1]; if (t) t.click(); }, 0);
+  }, true);
+
+  new MutationObserver(function () {
+    if (pm.hidden && root.classList.contains("ml-pr")) {
+      root.classList.remove("ml-pr");
+      var v = L.curView(); if (v === "leads" || v === "lead") root.classList.remove("mo-on");
+    }
+  }).observe(pm, { attributes: true, attributeFilter: ["hidden"] });
+
+  // Central Dispatch: summary card + one card per listing (built from the desktop table)
+  function build() {
+    if (!cd) return;
+    var rows = $$(".ptable__row", cd);
+    var box = $(".ml-pcd", cd);
+    if (!rows.length) { if (box) box.remove(); return; }
+    var sig = rows.length + "|" + txt(cd, ".ps-sum");
+    if (box && box.dataset.sig === sig) return;
+    if (!box) { box = el("div", "ml-pcd"); cd.appendChild(box); }
+    box.dataset.sig = sig;
+    var kv = {};
+    $$(".ps-sum__i", cd).forEach(function (i) { kv[txt(i, ".ps-sum__k")] = txt(i, ".ps-sum__v"); });
+    var html = '<div class="ml-pcd__veh"><div class="ml-pcd__vt"><b>' + esc(kv["Vehicle"] || "—") + "</b><span>" + esc([kv["Vehicle Type"], kv["Trailer type"]].filter(Boolean).join(" · ")) + "</span></div>" +
+      '<div class="ml-pcd__pt">' + ico("upload.svg") + "<span>" + esc(kv["Pick up"] || "—") + "</span></div>" +
+      '<div class="ml-pcd__row"><span class="ml-pcd__pt">' + ico("location.svg") + "<span>" + esc(kv["Delivery"] || "—") + '</span></span><span class="ml-pcd__mi">' + esc(kv["Distance"] || "") + "</span></div></div>";
+    var groups = $$(".ptable__group", cd).map(function (g) { return txt(g).replace(/ plan preview$/i, ""); });
+    html += '<p class="ml-pcd__lbl">' + esc(groups.join(" & ") + " plan preview") + "</p>";
+    rows.forEach(function (r) {
+      var td = $$(".ptable__td", r);
+      var t = function (i) { return td[i] ? txt(td[i]) : ""; };
+      var route = td[1] ? $$(".ps-route", td[1]).map(function (x) { return txt(x); }) : [];
+      var listed = td[3] ? txt(td[3], "b") : "", per = td[3] ? txt(td[3], ".ptable__sub") : "";
+      var fin = td[7] ? txt(td[7], "b") : "", fper = td[7] ? txt(td[7], ".ptable__sub") : "";
+      var st = td[6] ? $(".ps-st", td[6]) : null;
+      html += '<div class="ml-pcd__it"><div class="ml-pcd__r1"><b>' + esc(route.join(" → ")) + "</b><strong>" + esc(fin || listed) + "</strong></div>" +
+        '<div class="ml-pcd__r2"><span>' + esc([t(0), t(2), listed ? "Listed " + listed + (per ? " (" + per + ")" : "") : "", t(4)].filter(Boolean).join(" · ")) + "</span><span>" + esc(fper) + "</span></div>" +
+        '<div class="ml-pcd__r3"><span>Dispatched ' + esc(t(5)) + "</span>" + (st ? st.outerHTML : "") + "</div></div>";
+    });
+    box.innerHTML = html;
+  }
+  if (cd) new MutationObserver(function () { clearTimeout(build.t); build.t = setTimeout(build, 30); }).observe(cd, { childList: true, subtree: true });
 })();
 </script>
 <!-- m-lq:end -->
