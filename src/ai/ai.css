@@ -603,7 +603,8 @@ html[data-theme="dark"] .cai-orb { box-shadow: inset 0 -12px 22px rgba(38,96,255
   .cai-disclaimer { display: block; font-size: 12px; }
   .cai-input textarea { font-size: 16px; }
   .cai-main.is-empty .cai-body { justify-content: flex-start; padding-bottom: 0; }
-  .cai-main.is-empty .cai-scroll { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; overflow: auto; padding-bottom: 16px; }
+  .cai-main.is-empty .cai-scroll { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; overflow-x: hidden; overflow-y: auto; padding-bottom: 16px; }
+  .cai-scroll { overflow-x: hidden; }
   .cai-main.is-empty .cai-foot { padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
   .cai-main.is-empty .cai-disclaimer { position: static; }
   .cai-main.is-empty .cai-input textarea, .cai-input textarea { min-height: 40px; }
