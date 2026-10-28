@@ -173,6 +173,35 @@
 
   /* ---------- DOM refs ---------- */
   hydrate(root); fillOrbs(root);
+
+  /* ---------- Waves behind the orb: seamless sine ribbons, each drawn two periods wide and slid by half ---------- */
+  function buildWaves() {
+    var host = $("[data-cai-waves]"); if (!host) return;
+    var W = 1200, H = 220, mid = H / 2;
+    var layers = [
+      // [amplitude, wavelength, phase, stroke, width, opacity, duration(s), yOffset]
+      [26, 600, 0, "#2f7cff", 2, .55, 14, 0],
+      [34, 400, 1.2, "#6893f2", 1.6, .45, 18, 6],
+      [18, 300, 2.4, "#8b7cff", 1.4, .40, 11, -8],
+      [40, 600, 3.6, "#5fd4ff", 1.2, .35, 22, 10],
+      [14, 200, 4.4, "#2f7cff", 1, .30, 9, -14]
+    ];
+    function path(a, l, ph, dy) {
+      var d = "", step = 8;
+      for (var x = 0; x <= W * 2; x += step) {
+        var y = mid + dy + a * Math.sin((x / l) * Math.PI * 2 + ph);
+        d += (x ? "L" : "M") + x + " " + y.toFixed(1);
+      }
+      return d;
+    }
+    var svgs = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none"><defs><linearGradient id="caiWaveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a8dff" stop-opacity=".16"/><stop offset="1" stop-color="#5a8dff" stop-opacity="0"/></linearGradient></defs>' +
+      '<path class="fill" style="--d:26s;animation-duration:26s" fill="url(#caiWaveFill)" d="' + path(22, 600, .6, 18) + "L" + W * 2 + " " + H + "L0 " + H + 'Z"/>' +
+      layers.map(function (L) {
+        return '<path style="--d:' + L[6] + "s;animation-duration:" + L[6] + 's" stroke="' + L[3] + '" stroke-width="' + L[4] + '" opacity="' + L[5] + '" vector-effect="non-scaling-stroke" d="' + path(L[0], L[1], L[2], L[7]) + '"/>';
+      }).join("") + "</svg>";
+    host.innerHTML = svgs;
+  }
+  buildWaves();
   var main = $("[data-cai-main]"), thread = $("[data-cai-thread]"), scroll = $("[data-cai-scroll]");
   var tabsEl = $("[data-cai-tabs]"), pill = $("[data-cai-pill]"), titleEl = $("[data-cai-title]");
   var recentEl = $("[data-cai-recent]"), searchEl = $("[data-cai-search]");

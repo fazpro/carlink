@@ -151,7 +151,37 @@
 .cai-prompt:hover svg { transform: scale(1.15); color: var(--main); }
 
 /* orb */
-.cai-orb-wrap { position: relative; display: grid; place-items: center; width: 150px; height: 150px; }
+.cai-orb-wrap { position: relative; display: grid; place-items: center; width: 150px; height: 150px; isolation: isolate; }
+.cai-orb-wrap > * { grid-area: 1 / 1; }
+.cai-orb { z-index: 3; }
+
+/* aurora: three soft colour clouds drifting behind the orb */
+.cai-aurora { position: absolute; left: 50%; top: 50%; width: 560px; height: 300px; transform: translate(-50%, -50%); z-index: -2; pointer-events: none; filter: blur(42px); opacity: .9; }
+.cai-aurora i { position: absolute; border-radius: 50%; mix-blend-mode: multiply; }
+.cai-aurora i:nth-child(1) { left: 22%; top: 18%; width: 46%; height: 70%; background: rgba(70,130,255,.32); animation: cai-drift1 11s ease-in-out infinite; }
+.cai-aurora i:nth-child(2) { left: 40%; top: 26%; width: 40%; height: 60%; background: rgba(150,120,255,.24); animation: cai-drift2 13s ease-in-out infinite; }
+.cai-aurora i:nth-child(3) { left: 30%; top: 36%; width: 38%; height: 52%; background: rgba(90,230,255,.22); animation: cai-drift3 9s ease-in-out infinite; }
+html[data-theme="dark"] .cai-aurora i { mix-blend-mode: screen; }
+@keyframes cai-drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px, 14px) scale(1.15); } }
+@keyframes cai-drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(70px, -12px) scale(.9); } }
+@keyframes cai-drift3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-20px, -22px) scale(1.2); } }
+
+/* flowing wave lines */
+.cai-waves { position: absolute; left: 50%; top: 50%; width: min(1100px, 92vw); height: 220px; transform: translate(-50%, -50%); z-index: -1; pointer-events: none;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent), linear-gradient(transparent, #000 25%, #000 75%, transparent); -webkit-mask-composite: source-in;
+          mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent) intersect, linear-gradient(transparent, #000 25%, #000 75%, transparent); }
+.cai-waves svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cai-waves path { transform-box: fill-box; animation: cai-wave linear infinite; fill: none; stroke-linecap: round; }
+.cai-waves path.fill { stroke: none; }
+@keyframes cai-wave { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ripples expanding from the orb */
+.cai-ripple { width: 96px; height: 96px; border-radius: 50%; z-index: 1; pointer-events: none;
+  box-shadow: 0 0 0 1.5px rgba(77,141,255,.45), inset 0 0 18px rgba(77,141,255,.18);
+  animation: cai-ripple 4.2s cubic-bezier(.2,.6,.35,1) infinite; opacity: 0; }
+.cai-ripple:nth-of-type(2) { animation-delay: 1.4s; } .cai-ripple:nth-of-type(3) { animation-delay: 2.8s; }
+@keyframes cai-ripple { 0% { transform: scale(.95); opacity: .75; } 100% { transform: scale(3.1); opacity: 0; } }
+.cai-main.is-empty:has(.cai-composer:focus-within) .cai-waves path { animation-duration: calc(var(--d) * .55) !important; }
 .cai-orb-wrap::before {
   content: ""; position: absolute; inset: 14px; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(90,141,255,.55), rgba(90,141,255,0));
@@ -453,6 +483,9 @@ html[data-theme="dark"] .cai-rec { background: radial-gradient(120% 140% at 50% 
   .cai-hero h2 { font-size: 28px; }
   .cai-hero p { font-size: 15px; padding: 0 12px; }
   .cai-orb-wrap { width: 120px; height: 120px; }
+  .cai-aurora { width: 380px; height: 240px; }
+  .cai-waves { height: 170px; }
+  .cai-ripple { width: 76px; height: 76px; }
   .cai-orb { width: 76px; height: 76px; }
   .cai-prompts { margin-top: 20px; }
   .cai-prompt:nth-child(n+4) { display: none; }
