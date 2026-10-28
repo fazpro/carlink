@@ -75,9 +75,10 @@
       (rich ? '<circle class="o-spark" cx="70" cy="30" r="1.6" fill="#fff"/><circle class="o-spark" cx="28" cy="62" r="1.2" fill="#fff"/>' : '') +
       "</svg>";
   }
+  var PEARL = '<span class="o-core"><i></i><i></i><i></i></span><span class="o-rim"></span><span class="o-spec"></span>';
   function fillOrbs(scope) {
-    $$(".cai-orb:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = orbSVG(true); });
-    $$(".cai-av:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = orbSVG(false); });
+    $$(".cai-orb:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = PEARL; });
+    $$(".cai-av:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = PEARL; });
   }
 
   /* ---------- Data (from the Carlink prototype / Figma) ---------- */
