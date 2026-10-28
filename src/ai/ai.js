@@ -54,25 +54,25 @@
     var k = "o" + (++orbN);
     return '<svg viewBox="0 0 100 100" aria-hidden="true"><defs>' +
       '<radialGradient id="' + k + 'b" cx="40%" cy="32%" r="72%"><stop offset="0" stop-color="#b9dcff"/><stop offset=".3" stop-color="#4b8fff"/><stop offset=".68" stop-color="#1450f0"/><stop offset="1" stop-color="#0a238f"/></radialGradient>' +
-      '<linearGradient id="' + k + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3e6"/><stop offset=".35" stop-color="#7df9ff"/><stop offset=".65" stop-color="#ffd27a"/><stop offset="1" stop-color="#a68bff"/></linearGradient>' +
+      '<linearGradient id="' + k + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3d9ff"/><stop offset=".5" stop-color="#bfe8ff"/><stop offset="1" stop-color="#d9d2ff"/></linearGradient>' +
       '<clipPath id="' + k + 'c"><circle cx="50" cy="50" r="48"/></clipPath>' +
       '<filter id="' + k + 'f" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter>' +
       '<filter id="' + k + 'g" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".7"/></filter></defs>' +
       '<circle cx="50" cy="50" r="48" fill="url(#' + k + 'b)"/>' +
       '<g clip-path="url(#' + k + 'c)">' +
         '<g class="o-swirl" style="mix-blend-mode:screen">' +
-          '<path d="M-2 66C20 30 54 86 102 34" stroke="#8fdcff" stroke-width="18" fill="none" opacity=".55" filter="url(#' + k + 'f)"/>' +
-          '<path d="M0 62C24 34 54 80 100 38" stroke="#e8fbff" stroke-width="6" fill="none" opacity=".9" filter="url(#' + k + 'f)"/>' +
-          '<path d="M2 60C26 36 54 76 98 40" stroke="#fff" stroke-width="2.2" fill="none" filter="url(#' + k + 'g)"/>' +
-          '<path d="M8 80C32 50 66 92 96 58" stroke="#5ff2ff" stroke-width="7" fill="none" opacity=".55" filter="url(#' + k + 'f)"/>' +
+          '<path d="M-2 66C20 30 54 86 102 34" stroke="#8fdcff" stroke-width="18" fill="none" opacity=".32" filter="url(#' + k + 'f)"/>' +
+          '<path d="M0 62C24 34 54 80 100 38" stroke="#e8fbff" stroke-width="6" fill="none" opacity=".55" filter="url(#' + k + 'f)"/>' +
+          '<path d="M2 60C26 36 54 76 98 40" stroke="#fff" stroke-width="1.6" fill="none" opacity=".85" filter="url(#' + k + 'g)"/>' +
+          '<path d="M8 80C32 50 66 92 96 58" stroke="#7fd8ff" stroke-width="7" fill="none" opacity=".3" filter="url(#' + k + 'f)"/>' +
         '</g>' +
-        (rich ? '<g class="o-swirl2" style="mix-blend-mode:screen"><path d="M4 30C30 56 62 8 98 28" stroke="#cdeeff" stroke-width="5" fill="none" opacity=".75" filter="url(#' + k + 'f)"/>' +
+        (rich ? '<g class="o-swirl2" style="mix-blend-mode:screen"><path d="M4 30C30 56 62 8 98 28" stroke="#cdeeff" stroke-width="5" fill="none" opacity=".4" filter="url(#' + k + 'f)"/>' +
           '<path d="M6 31C31 54 62 11 96 29" stroke="#fff" stroke-width="1.6" fill="none" filter="url(#' + k + 'g)"/>' +
-          '<path d="M16 88C40 64 70 70 90 84" stroke="#ff9ee0" stroke-width="5" fill="none" opacity=".5" filter="url(#' + k + 'f)"/></g>' : '') +
+          '<path d="M16 88C40 64 70 70 90 84" stroke="#c9b6ff" stroke-width="5" fill="none" opacity=".25" filter="url(#' + k + 'f)"/></g>' : '') +
         '<ellipse cx="34" cy="24" rx="16" ry="8" transform="rotate(-24 34 24)" fill="#fff" opacity=".55" filter="url(#' + k + 'f)"/>' +
-        '<g class="o-rim"><circle cx="50" cy="50" r="46.5" fill="none" stroke="url(#' + k + 'r)" stroke-width="3" opacity=".85" filter="url(#' + k + 'g)"/></g>' +
+        '<g class="o-rim"><circle cx="50" cy="50" r="46.5" fill="none" stroke="url(#' + k + 'r)" stroke-width="2" opacity=".35" filter="url(#' + k + 'g)"/></g>' +
       '</g>' +
-      (rich ? '<circle class="o-spark" cx="70" cy="30" r="1.6" fill="#fff"/><circle class="o-spark" cx="28" cy="62" r="1.2" fill="#fff"/><circle class="o-spark" cx="62" cy="72" r="1.1" fill="#e6fbff"/><circle class="o-spark" cx="44" cy="40" r=".9" fill="#fff"/>' : '') +
+      (rich ? '<circle class="o-spark" cx="70" cy="30" r="1.6" fill="#fff"/><circle class="o-spark" cx="28" cy="62" r="1.2" fill="#fff"/>' : '') +
       "</svg>";
   }
   function fillOrbs(scope) {
@@ -180,11 +180,9 @@
     var W = 1200, H = 220, mid = H / 2;
     var layers = [
       // [amplitude, wavelength, phase, stroke, width, opacity, duration(s), yOffset]
-      [26, 600, 0, "#2f7cff", 2, .55, 14, 0],
-      [34, 400, 1.2, "#6893f2", 1.6, .45, 18, 6],
-      [18, 300, 2.4, "#8b7cff", 1.4, .40, 11, -8],
-      [40, 600, 3.6, "#5fd4ff", 1.2, .35, 22, 10],
-      [14, 200, 4.4, "#2f7cff", 1, .30, 9, -14]
+      [12, 600, 0, "#3b7bff", 1, .22, 34, 0],
+      [16, 1200, 1.8, "#7c8cff", 1, .16, 46, 4],
+      [9, 400, 3.2, "#5aa9ff", 1, .14, 28, -4]
     ];
     function path(a, l, ph, dy) {
       var d = "", step = 8;
@@ -195,7 +193,6 @@
       return d;
     }
     var svgs = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none"><defs><linearGradient id="caiWaveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a8dff" stop-opacity=".16"/><stop offset="1" stop-color="#5a8dff" stop-opacity="0"/></linearGradient></defs>' +
-      '<path class="fill" style="--d:26s;animation-duration:26s" fill="url(#caiWaveFill)" d="' + path(22, 600, .6, 18) + "L" + W * 2 + " " + H + "L0 " + H + 'Z"/>' +
       layers.map(function (L) {
         return '<path style="--d:' + L[6] + "s;animation-duration:" + L[6] + 's" stroke="' + L[3] + '" stroke-width="' + L[4] + '" opacity="' + L[5] + '" vector-effect="non-scaling-stroke" d="' + path(L[0], L[1], L[2], L[7]) + '"/>';
       }).join("") + "</svg>";
