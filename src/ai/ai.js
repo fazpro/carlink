@@ -75,7 +75,34 @@
       (rich ? '<circle class="o-spark" cx="70" cy="30" r="1.6" fill="#fff"/><circle class="o-spark" cx="28" cy="62" r="1.2" fill="#fff"/>' : '') +
       "</svg>";
   }
-  var PEARL = '<span class="o-core"><i></i><i></i><i></i></span><span class="o-rim"></span><span class="o-spec"></span>';
+  var PEARL = '<span class="o-core"><i></i><i></i><i></i></span><span class="o-gloss"></span>';
+  /* ribbons around the hero sphere: 3 bands × 9 echo strands, each strand a softly
+     wavy ellipse; staggered delays make the strands fan out like a light trail */
+  function ribbonPath(rx, ry, amp, ph) {
+    var d = "", n = 96;
+    for (var j = 0; j <= n; j++) {
+      var t = j / n * Math.PI * 2, k = 1 + amp * Math.sin(2 * t + ph);
+      d += (j ? "L" : "M") + (rx * k * Math.cos(t)).toFixed(2) + " " + (ry * k * Math.sin(t)).toFixed(2);
+    }
+    return d + "Z";
+  }
+  function buildRibbons() {
+    var svgs = $$("[data-cai-rib]"); if (!svgs.length) return;
+    var defs = '<defs>' +
+      '<linearGradient id="cai-rg1" gradientUnits="userSpaceOnUse" x1="-70" y1="0" x2="70" y2="0"><stop offset="0" style="stop-color:var(--rc-a);stop-opacity:0"/><stop offset=".35" style="stop-color:var(--rc-b)"/><stop offset=".6" style="stop-color:var(--rc-c)"/><stop offset="1" style="stop-color:var(--rc-a);stop-opacity:.1"/></linearGradient>' +
+      '<linearGradient id="cai-rg2" gradientUnits="userSpaceOnUse" x1="0" y1="-70" x2="0" y2="70"><stop offset="0" style="stop-color:var(--rc-d);stop-opacity:.15"/><stop offset=".5" style="stop-color:var(--rc-b)"/><stop offset="1" style="stop-color:var(--rc-c);stop-opacity:.2"/></linearGradient></defs>';
+    var bands = [["rb1", 56, 0.05, 0], ["rb2", 61, 0.07, 1.4], ["rb3", 52, 0.04, 2.6]];
+    var body = bands.map(function (b, bi) {
+      var paths = "";
+      for (var i = 0; i < 9; i++) {
+        paths += '<path d="' + ribbonPath(b[1] + i * 0.7, b[1] + i * 0.7, b[2], b[3] + i * 0.22) +
+          '" style="--d:' + (-(bi * 3.7) - i * 0.11).toFixed(2) + 's;opacity:' + (1 - i * 0.08).toFixed(2) + '"/>';
+      }
+      return '<g class="' + b[0] + '">' + paths + "</g>";
+    }).join("");
+    svgs.forEach(function (s, i) { s.innerHTML = (i ? "" : defs) + body; });
+  }
+  buildRibbons();
   function fillOrbs(scope) {
     $$(".cai-orb:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = PEARL; });
     $$(".cai-av:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = PEARL; });
