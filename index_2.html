@@ -5653,18 +5653,100 @@ html[data-theme="dark"] .cai-orb { box-shadow: inset 0 -12px 22px rgba(38,96,255
 @keyframes cai-ground { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(.82); opacity: .55; } }
 @media (max-width: 767px) { .cai-orb { width: 76px; height: 76px; } .cai-orb-wrap::after { top: calc(50% + 46px); } }
 
+/* ---------- Phone (Figma «AI Assistant — Mobile») ----------
+   Full-screen chat without the app header / tab bar, own top bar (back · title ·
+   chats · options), Chats as a full-screen panel, options as a bottom sheet,
+   and a floating "Ask AI" button on Home. */
+.cai-mbar, .cai-fab, .cai-msheet, .cai-bd { display: none; }
+@media (max-width: 767px) {
+  .topbar .cai-ask { display: none; }
+  html.cai-route .topbar, html.cai-route .mtab, html.cai-route .od-banner { display: none !important; }
+  html.cai-route .view.cai-view { padding: 0; }
+  .cai { height: 100dvh; padding-top: env(safe-area-inset-top, 0px); }
+  .cai-main { border-radius: 0; box-shadow: none; }
+  .cai-head { display: none; }
+  .cai-mbar { position: relative; z-index: 2; display: flex; align-items: center; gap: 2px; flex: none; height: 52px; padding: 0 8px 0 4px; }
+  .cai-mbar__title { flex: 1 1 auto; min-width: 0; margin: 0 0 0 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -.02em; color: var(--black); }
+  .cai-mbtn { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 12px; color: var(--black);
+    -webkit-tap-highlight-color: transparent; transition: background-color .15s, transform .2s var(--cai-spring, ease); }
+  .cai-mbtn:active { background: var(--hover); transform: scale(.94); }
+  .cai-mbtn svg { width: 20px; height: 20px; }
+  .cai-main.is-empty .cai-mbtn--more { display: none; }
+  .cai-scroll { padding-top: 8px; }
+  .cai-foot { padding: 0 16px calc(8px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+  .cai-disclaimer { display: block; font-size: 12px; }
+  .cai-input textarea { font-size: 16px; }
+  .cai-main.is-empty .cai-body { justify-content: flex-start; padding-bottom: 0; }
+  .cai-main.is-empty .cai-scroll { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; overflow: auto; padding-bottom: 16px; }
+  .cai-main.is-empty .cai-foot { padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .cai-main.is-empty .cai-disclaimer { position: static; }
+  .cai-main.is-empty .cai-input textarea, .cai-input textarea { min-height: 40px; }
+
+  /* Chats panel (09 · AI — Chats) */
+  .cai.is-chats .cai-side {
+    position: fixed; inset: 0; z-index: 90; display: flex; gap: 4px; overflow: auto;
+    padding: env(safe-area-inset-top, 0px) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface); animation: cai-panel-in .32s cubic-bezier(.22,.8,.32,1);
+  }
+  .cai-side .cai-mbar--side { display: flex; margin: 0 -8px 8px -12px; }
+  .cai-side > .cai-nav[data-cai-new] { display: none; }
+  .cai-side .cai-search { height: 42px; padding: 0 12px; border-radius: 12px; background: var(--bg); }
+  .cai-side .cai-search input { font-size: 16px; }
+  .cai-side .cai-search input::placeholder { color: var(--light-black); }
+  .cai-side__label { padding: 16px 12px 4px; font-size: 13px; font-weight: 500; }
+  .cai-recent { overflow: visible; gap: 0; }
+  .cai-recent__item { height: 48px; padding: 0 4px 0 12px; border-radius: 12px; font-size: 15px; }
+  .cai-recent__item.is-active { background: var(--bg); box-shadow: none; font-weight: 500; }
+  .cai-recent__more { width: 40px; height: 40px; border-radius: 10px; }
+  .cai-recent__more svg { width: 18px; height: 18px; }
+  @keyframes cai-panel-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* Chat options sheet (10 · AI — Chat options) — rides on the shell's .msheet styles */
+  .cai-bd.is-on { display: block; z-index: 94; }
+  .cai-msheet { z-index: 95; }
+  .cai-msheet__list { display: flex; flex-direction: column; gap: 4px; padding: 8px 16px 16px; }
+  .cai-msheet__it { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 4px; border-radius: 12px; font-size: 16px; font-weight: 500; color: var(--black); text-align: left; -webkit-tap-highlight-color: transparent; }
+  .cai-msheet__it:active { background: var(--bg); }
+  .cai-msheet__ic { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--bg); }
+  .cai-msheet__ic svg { width: 20px; height: 20px; }
+  .cai-msheet__it.is-danger { color: var(--red); }
+  .cai-msheet__it.is-danger .cai-msheet__ic { background: color-mix(in srgb, var(--red) 12%, transparent); }
+
+  /* Home: floating Ask AI (same placement as the Create FAB) */
+  .cai-fab {
+    position: fixed; right: 17px; bottom: calc(90px + 13px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: inline-flex; align-items: center; gap: 6px;
+    height: 44px; padding: 0 14px 0 12px; border: 0; border-radius: 12px; background: var(--main); color: #fff; font-size: 14px; font-weight: 500;
+    box-shadow: 0 6px 20px rgba(0, 95, 249, .28); transition: transform .2s var(--ease-spring, ease); -webkit-tap-highlight-color: transparent;
+  }
+  .cai-fab svg { width: 18px; height: 18px; }
+  .cai-fab:active { transform: scale(.97); }
+  html.m-bill-on .cai-fab { bottom: calc(200px + 13px + env(safe-area-inset-bottom, 0px)); }
+}
+
 </style>
   <main class="body view cai-view" data-view="ai" hidden>
     <div class="cai" data-cai>
       <aside class="cai-side" aria-label="AI chats">
+        <div class="cai-mbar cai-mbar--side">
+          <button class="cai-mbtn" type="button" aria-label="Close chats" data-cai-mclose><i data-ico="left"></i></button>
+          <h1 class="cai-mbar__title">Chats</h1>
+          <button class="cai-mbtn" type="button" aria-label="New chat" data-cai-new><i data-ico="pen"></i></button>
+        </div>
         <button class="cai-nav" type="button" data-cai-new><i data-ico="pen"></i>New chat</button>
-        <label class="cai-nav cai-search"><i data-ico="search"></i><input type="search" placeholder="Search" aria-label="Search chats" data-cai-search></label>
+        <label class="cai-nav cai-search"><i data-ico="search"></i><input type="search" placeholder="Search chats" aria-label="Search chats" data-cai-search></label>
         <div class="cai-side__label">Recent</div>
         <div class="cai-recent" data-cai-recent></div>
       </aside>
 
       <section class="cai-main is-empty" data-cai-main aria-label="Carlink AI">
         <div class="cai-glow" aria-hidden="true"></div>
+        <div class="cai-mbar">
+          <button class="cai-mbtn" type="button" aria-label="Back" data-cai-mback><i data-ico="left"></i></button>
+          <h1 class="cai-mbar__title" data-cai-mtitle>New chat</h1>
+          <button class="cai-mbtn" type="button" aria-label="Chats" data-cai-mchats><i data-ico="history"></i></button>
+          <button class="cai-mbtn cai-mbtn--more" type="button" aria-label="Chat options" aria-haspopup="dialog" data-cai-mmore><i data-ico="more"></i></button>
+        </div>
         <div class="cai-head">
           <div class="cai-newtitle">New chat</div>
           <div class="cai-tabs" role="tablist" data-cai-tabs><span class="cai-tabs__pill" data-cai-pill></span></div>
@@ -22385,6 +22467,8 @@ main[data-view="orders"] .btn-columns { background: var(--soft-gray); border-col
     users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
     chart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
     trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+    history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
     check2: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'
   };
   function svg(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[name] || "") + "</svg>"; }
@@ -22724,6 +22808,7 @@ main[data-view="orders"] .btn-columns { background: var(--soft-gray); border-col
     main.classList.toggle("is-empty", !t);
     if (t && tabs.indexOf(t.id) < 0) { tabs.push(t.id); newTabId = t.id; }
     renderTabs(); renderRecent();
+    mtitle.textContent = t ? short(t) : "New chat"; root.classList.remove("is-chats");
     if (t) {
       if (titleEl.textContent !== t.title) { titleEl.textContent = t.title; titleEl.classList.remove("is-swap"); void titleEl.offsetWidth; titleEl.classList.add("is-swap"); }
       if (!opts.keep) {
@@ -22772,7 +22857,7 @@ main[data-view="orders"] .btn-columns { background: var(--soft-gray); border-col
     if (startNew) {
       var swap = function () {
         current = t.id; main.classList.remove("is-empty"); newTabId = t.id; tabs.push(t.id);
-        renderTabs(); renderRecent(); titleEl.textContent = t.title; titleEl.classList.add("is-swap");
+        renderTabs(); renderRecent(); titleEl.textContent = t.title; titleEl.classList.add("is-swap"); mtitle.textContent = short(t);
         history.replaceState(null, "", "#ai/" + t.id);
         thread.innerHTML = ""; append();
       };
@@ -22886,6 +22971,10 @@ main[data-view="orders"] .btn-columns { background: var(--soft-gray); border-col
       }, 190);
       return;
     }
+    if ((t = e.target.closest("[data-cai-mback]"))) { location.hash = lastOutside || "home"; return; }
+    if ((t = e.target.closest("[data-cai-mchats]"))) { root.classList.add("is-chats"); return; }
+    if ((t = e.target.closest("[data-cai-mclose]"))) { root.classList.remove("is-chats"); return; }
+    if ((t = e.target.closest("[data-cai-mmore]"))) { openOpts(); return; }
     if ((t = e.target.closest("[data-cai-open]"))) { go(t.dataset.caiOpen); return; }
     if ((t = e.target.closest("[data-cai-new]"))) { go(null); return; }
     if ((t = e.target.closest("[data-cai-back]"))) { go(null); return; }
@@ -22966,8 +23055,43 @@ main[data-view="orders"] .btn-columns { background: var(--soft-gray); border-col
     if ((e.metaKey || e.ctrlKey) && (e.key === "j" || e.key === "J")) { e.preventDefault(); if (aiVisible()) location.hash = lastOutside || "home"; else location.hash = current ? "ai/" + current : "ai"; }
     if (e.key === "Escape" && aiVisible() && !rec.hidden) stopRec(false);
   });
+  /* ---------- Phone: chat options sheet + Home "Ask AI" button ---------- */
+  var mtitle = $("[data-cai-mtitle]");
+  var optBd = el('<div class="msheet-bd cai-bd" aria-hidden="true"></div>');
+  var opt = el('<div class="msheet cai-msheet" role="dialog" aria-modal="true" aria-label="Chat options" hidden>' +
+    '<div class="m-sheet-head"><h2 data-cai-opt-title></h2><button class="m-x" type="button" aria-label="Close" data-cai-opt-x>' + svg("x") + "</button></div>" +
+    '<div class="cai-msheet__list">' + [["pen", "New chat", "new"], ["link", "Copy link", "link"], ["trash", "Delete chat", "delete"]].map(function (it) {
+      return '<button class="cai-msheet__it' + (it[2] === "delete" ? " is-danger" : "") + '" type="button" data-cai-opt="' + it[2] + '"><span class="cai-msheet__ic">' + svg(it[0]) + "</span>" + it[1] + "</button>";
+    }).join("") + "</div></div>");
+  document.body.appendChild(optBd); document.body.appendChild(opt);
+  function openOpts() {
+    var t = byId(current); if (!t) return;
+    $("[data-cai-opt-title]", opt).textContent = short(t);
+    opt.hidden = false; opt.classList.remove("is-leaving"); optBd.classList.add("is-on"); document.documentElement.classList.add("m-lock");
+  }
+  function closeOpts() {
+    if (opt.hidden) return;
+    opt.classList.add("is-leaving"); optBd.classList.remove("is-on"); document.documentElement.classList.remove("m-lock");
+    setTimeout(function () { opt.hidden = true; opt.classList.remove("is-leaving"); }, 190);
+  }
+  optBd.addEventListener("click", closeOpts);
+  opt.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-cai-opt]");
+    if (e.target.closest("[data-cai-opt-x]")) { closeOpts(); return; }
+    if (b) { var k = b.dataset.caiOpt; closeOpts(); setTimeout(function () { toolItem(k); }, 120); }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeOpts(); root.classList.remove("is-chats"); } });
+
+  var homeView = $('[data-view="home"]'), askIco = $(".cai-ask__ico");
+  if (homeView) {
+    var fab = el('<button class="cai-fab" type="button" aria-label="Ask Carlink AI" data-cai-go>' + (askIco ? askIco.innerHTML : "") + "<span>Ask AI</span></button>");
+    homeView.appendChild(fab);
+  }
+  function syncRouteClass(view) { document.documentElement.classList.toggle("cai-route", view === "ai"); }
+
   document.addEventListener("carlink:route", function (e) {
     var r = e.detail || {};
+    syncRouteClass(r.view); if (r.view !== "ai") { closeOpts(); root.classList.remove("is-chats"); }
     $$(".cai-ask").forEach(function (b) { b.classList.toggle("is-active", r.view === "ai"); });
     if (r.view !== "ai") { lastOutside = location.hash.replace(/^#/, ""); if (busy) busy.cancel(); return; }
     var id = r.id && byId(r.id) ? r.id : null;
@@ -22975,6 +23099,7 @@ main[data-view="orders"] .btn-columns { background: var(--soft-gray); border-col
   });
   setReply(null);
   renderTabs(); renderRecent();
+  if (window.Carlink && window.Carlink.route) syncRouteClass(window.Carlink.route.view);
   if (window.Carlink && window.Carlink.route && window.Carlink.route.view === "ai") { $$(".cai-ask").forEach(function (b) { b.classList.add("is-active"); }); requestAnimationFrame(fitHeight); }
   if (window.Carlink && window.Carlink.route && window.Carlink.route.view === "ai") render(window.Carlink.route.id && byId(window.Carlink.route.id) ? window.Carlink.route.id : null);
 })();

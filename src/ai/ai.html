@@ -1,14 +1,25 @@
   <main class="body view cai-view" data-view="ai" hidden>
     <div class="cai" data-cai>
       <aside class="cai-side" aria-label="AI chats">
+        <div class="cai-mbar cai-mbar--side">
+          <button class="cai-mbtn" type="button" aria-label="Close chats" data-cai-mclose><i data-ico="left"></i></button>
+          <h1 class="cai-mbar__title">Chats</h1>
+          <button class="cai-mbtn" type="button" aria-label="New chat" data-cai-new><i data-ico="pen"></i></button>
+        </div>
         <button class="cai-nav" type="button" data-cai-new><i data-ico="pen"></i>New chat</button>
-        <label class="cai-nav cai-search"><i data-ico="search"></i><input type="search" placeholder="Search" aria-label="Search chats" data-cai-search></label>
+        <label class="cai-nav cai-search"><i data-ico="search"></i><input type="search" placeholder="Search chats" aria-label="Search chats" data-cai-search></label>
         <div class="cai-side__label">Recent</div>
         <div class="cai-recent" data-cai-recent></div>
       </aside>
 
       <section class="cai-main is-empty" data-cai-main aria-label="Carlink AI">
         <div class="cai-glow" aria-hidden="true"></div>
+        <div class="cai-mbar">
+          <button class="cai-mbtn" type="button" aria-label="Back" data-cai-mback><i data-ico="left"></i></button>
+          <h1 class="cai-mbar__title" data-cai-mtitle>New chat</h1>
+          <button class="cai-mbtn" type="button" aria-label="Chats" data-cai-mchats><i data-ico="history"></i></button>
+          <button class="cai-mbtn cai-mbtn--more" type="button" aria-label="Chat options" aria-haspopup="dialog" data-cai-mmore><i data-ico="more"></i></button>
+        </div>
         <div class="cai-head">
           <div class="cai-newtitle">New chat</div>
           <div class="cai-tabs" role="tablist" data-cai-tabs><span class="cai-tabs__pill" data-cai-pill></span></div>

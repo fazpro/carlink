@@ -39,6 +39,8 @@
     users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
     chart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
     trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+    history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
     check2: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'
   };
   function svg(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[name] || "") + "</svg>"; }
@@ -378,6 +380,7 @@
     main.classList.toggle("is-empty", !t);
     if (t && tabs.indexOf(t.id) < 0) { tabs.push(t.id); newTabId = t.id; }
     renderTabs(); renderRecent();
+    mtitle.textContent = t ? short(t) : "New chat"; root.classList.remove("is-chats");
     if (t) {
       if (titleEl.textContent !== t.title) { titleEl.textContent = t.title; titleEl.classList.remove("is-swap"); void titleEl.offsetWidth; titleEl.classList.add("is-swap"); }
       if (!opts.keep) {
@@ -426,7 +429,7 @@
     if (startNew) {
       var swap = function () {
         current = t.id; main.classList.remove("is-empty"); newTabId = t.id; tabs.push(t.id);
-        renderTabs(); renderRecent(); titleEl.textContent = t.title; titleEl.classList.add("is-swap");
+        renderTabs(); renderRecent(); titleEl.textContent = t.title; titleEl.classList.add("is-swap"); mtitle.textContent = short(t);
         history.replaceState(null, "", "#ai/" + t.id);
         thread.innerHTML = ""; append();
       };
@@ -540,6 +543,10 @@
       }, 190);
       return;
     }
+    if ((t = e.target.closest("[data-cai-mback]"))) { location.hash = lastOutside || "home"; return; }
+    if ((t = e.target.closest("[data-cai-mchats]"))) { root.classList.add("is-chats"); return; }
+    if ((t = e.target.closest("[data-cai-mclose]"))) { root.classList.remove("is-chats"); return; }
+    if ((t = e.target.closest("[data-cai-mmore]"))) { openOpts(); return; }
     if ((t = e.target.closest("[data-cai-open]"))) { go(t.dataset.caiOpen); return; }
     if ((t = e.target.closest("[data-cai-new]"))) { go(null); return; }
     if ((t = e.target.closest("[data-cai-back]"))) { go(null); return; }
@@ -620,8 +627,43 @@
     if ((e.metaKey || e.ctrlKey) && (e.key === "j" || e.key === "J")) { e.preventDefault(); if (aiVisible()) location.hash = lastOutside || "home"; else location.hash = current ? "ai/" + current : "ai"; }
     if (e.key === "Escape" && aiVisible() && !rec.hidden) stopRec(false);
   });
+  /* ---------- Phone: chat options sheet + Home "Ask AI" button ---------- */
+  var mtitle = $("[data-cai-mtitle]");
+  var optBd = el('<div class="msheet-bd cai-bd" aria-hidden="true"></div>');
+  var opt = el('<div class="msheet cai-msheet" role="dialog" aria-modal="true" aria-label="Chat options" hidden>' +
+    '<div class="m-sheet-head"><h2 data-cai-opt-title></h2><button class="m-x" type="button" aria-label="Close" data-cai-opt-x>' + svg("x") + "</button></div>" +
+    '<div class="cai-msheet__list">' + [["pen", "New chat", "new"], ["link", "Copy link", "link"], ["trash", "Delete chat", "delete"]].map(function (it) {
+      return '<button class="cai-msheet__it' + (it[2] === "delete" ? " is-danger" : "") + '" type="button" data-cai-opt="' + it[2] + '"><span class="cai-msheet__ic">' + svg(it[0]) + "</span>" + it[1] + "</button>";
+    }).join("") + "</div></div>");
+  document.body.appendChild(optBd); document.body.appendChild(opt);
+  function openOpts() {
+    var t = byId(current); if (!t) return;
+    $("[data-cai-opt-title]", opt).textContent = short(t);
+    opt.hidden = false; opt.classList.remove("is-leaving"); optBd.classList.add("is-on"); document.documentElement.classList.add("m-lock");
+  }
+  function closeOpts() {
+    if (opt.hidden) return;
+    opt.classList.add("is-leaving"); optBd.classList.remove("is-on"); document.documentElement.classList.remove("m-lock");
+    setTimeout(function () { opt.hidden = true; opt.classList.remove("is-leaving"); }, 190);
+  }
+  optBd.addEventListener("click", closeOpts);
+  opt.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-cai-opt]");
+    if (e.target.closest("[data-cai-opt-x]")) { closeOpts(); return; }
+    if (b) { var k = b.dataset.caiOpt; closeOpts(); setTimeout(function () { toolItem(k); }, 120); }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeOpts(); root.classList.remove("is-chats"); } });
+
+  var homeView = $('[data-view="home"]'), askIco = $(".cai-ask__ico");
+  if (homeView) {
+    var fab = el('<button class="cai-fab" type="button" aria-label="Ask Carlink AI" data-cai-go>' + (askIco ? askIco.innerHTML : "") + "<span>Ask AI</span></button>");
+    homeView.appendChild(fab);
+  }
+  function syncRouteClass(view) { document.documentElement.classList.toggle("cai-route", view === "ai"); }
+
   document.addEventListener("carlink:route", function (e) {
     var r = e.detail || {};
+    syncRouteClass(r.view); if (r.view !== "ai") { closeOpts(); root.classList.remove("is-chats"); }
     $$(".cai-ask").forEach(function (b) { b.classList.toggle("is-active", r.view === "ai"); });
     if (r.view !== "ai") { lastOutside = location.hash.replace(/^#/, ""); if (busy) busy.cancel(); return; }
     var id = r.id && byId(r.id) ? r.id : null;
@@ -629,6 +671,7 @@
   });
   setReply(null);
   renderTabs(); renderRecent();
+  if (window.Carlink && window.Carlink.route) syncRouteClass(window.Carlink.route.view);
   if (window.Carlink && window.Carlink.route && window.Carlink.route.view === "ai") { $$(".cai-ask").forEach(function (b) { b.classList.add("is-active"); }); requestAnimationFrame(fitHeight); }
   if (window.Carlink && window.Carlink.route && window.Carlink.route.view === "ai") render(window.Carlink.route.id && byId(window.Carlink.route.id) ? window.Carlink.route.id : null);
 })();
