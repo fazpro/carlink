@@ -1,0 +1,70 @@
+  <main class="body view cai-view" data-view="ai" hidden>
+    <div class="cai" data-cai>
+      <aside class="cai-side" aria-label="AI chats">
+        <button class="cai-nav" type="button" data-cai-new><i data-ico="pen"></i>New chat</button>
+        <label class="cai-nav cai-search"><i data-ico="search"></i><input type="search" placeholder="Search" aria-label="Search chats" data-cai-search></label>
+        <div class="cai-side__label">Recent</div>
+        <div class="cai-recent" data-cai-recent></div>
+      </aside>
+
+      <section class="cai-main is-empty" data-cai-main aria-label="Carlink AI">
+        <div class="cai-glow" aria-hidden="true"></div>
+        <div class="cai-head">
+          <div class="cai-newtitle">New chat</div>
+          <div class="cai-tabs" role="tablist" data-cai-tabs><span class="cai-tabs__pill" data-cai-pill></span></div>
+          <div class="cai-title">
+            <button class="cai-back" type="button" aria-label="Back to new chat" data-cai-back><i data-ico="left"></i></button>
+            <h1 data-cai-title></h1>
+          </div>
+        </div>
+
+        <div class="cai-body">
+          <div class="cai-scroll" data-cai-scroll>
+            <div class="cai-hero">
+              <div class="cai-orb-wrap"><div class="cai-orb" data-cai-orb></div></div>
+              <h2>Hello! What can I help you with?</h2>
+              <p>Ask anything about your leads, quotes and orders, or pick a prompt.</p>
+              <div class="cai-prompts" data-cai-prompts></div>
+            </div>
+            <div class="cai-thread" data-cai-thread aria-live="polite"></div>
+          </div>
+
+          <div class="cai-foot">
+            <div class="cai-composer" data-cai-composer>
+              <div class="cai-input" data-cai-input>
+                <div class="cai-reply" data-cai-reply hidden><i data-ico="reply"></i><span></span><button type="button" aria-label="Cancel reply" data-cai-reply-x><i data-ico="x"></i></button></div>
+                <div class="cai-files" data-cai-files hidden></div>
+                <textarea rows="1" placeholder="Ask anything or drop a file…" aria-label="Message Carlink AI" data-cai-text></textarea>
+                <div class="cai-tools">
+                  <span class="cai-agent"><span class="cai-av cai-av--s"></span>Carlink AI</span>
+                  <button class="cai-tool" type="button" aria-label="Attach file" title="Attach file" data-cai-attach><i data-ico="clip"></i></button>
+                  <span class="grow"></span>
+                  <button class="cai-tool" type="button" aria-label="Voice input" title="Voice input" data-cai-mic><i data-ico="mic"></i></button>
+                  <button class="cai-send" type="button" aria-label="Send" data-cai-send><i data-ico="up"></i></button>
+                </div>
+              </div>
+              <div class="cai-rec" data-cai-rec hidden>
+                <div class="cai-rec__lbl">Recording audio…</div>
+                <div class="cai-wave" aria-hidden="true" data-cai-wave></div>
+                <div class="cai-rec__time"><span class="cai-rec__dot"></span><span data-cai-time>0:00</span></div>
+                <div class="cai-rec__ctl">
+                  <button class="cai-pill" type="button" data-cai-rec-cancel>Cancel</button>
+                  <span class="grow"></span>
+                  <button class="cai-round" type="button" aria-label="Pause recording" data-cai-rec-pause><i data-ico="pause"></i></button>
+                  <button class="cai-round cai-round--go" type="button" aria-label="Finish recording" data-cai-rec-done><i data-ico="check"></i></button>
+                </div>
+              </div>
+              <div class="cai-dropzone" data-cai-drop hidden>
+                <svg class="cai-dropzone__ring" aria-hidden="true"><rect x=".75" y=".75" rx="17.25"/></svg>
+                <i data-ico="cloud"></i>
+                <b>Drop files here to attach</b>
+                <span>PDF, DOC, XLS, PNG, JPG, ZIP · Max 10 MB</span>
+              </div>
+              <input type="file" multiple hidden data-cai-file>
+            </div>
+            <p class="cai-disclaimer">AI can make mistakes. Always verify important information.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
