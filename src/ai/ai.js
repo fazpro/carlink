@@ -661,22 +661,21 @@
   }
   function syncRouteClass(view) { document.documentElement.classList.toggle("cai-route", view === "ai"); }
 
-  /* ---------- Liquid sphere (WebGL) on the hero orb; avatars get a still of it ----------
-     Light themes: white glass with Carlink-blue liquid. Dark theme: the night version. */
+  /* ---------- Glass sphere (WebGL, variant C «Shisha») on the hero orb; avatars get a still of it ---------- */
   (function liquid() {
-    var o = $("[data-cai-orb]"); if (!o || !window.CaiLiquid) return;
+    var o = $("[data-cai-orb]"); if (!o || !window.CaiOrb) return;
     var html = document.documentElement;
     function isDark() { return html.getAttribute("data-theme") === "dark"; }
     var c = document.createElement("canvas"); c.className = "cai-liquid"; c.setAttribute("aria-hidden", "true");
     o.appendChild(c);
-    var L = null; try { L = window.CaiLiquid.mount(c, { dark: isDark() }); } catch (e) { L = null; }
+    var L = null; try { L = window.CaiOrb.mount(c, { variant: "glass", radius: .6 }); } catch (e) { L = null; }
     if (!L) { c.remove(); return; }
     o.classList.add("is-liquid");
     function still() {
       try {
         var k = document.createElement("canvas"); k.width = k.height = 96;
         var tmp = document.createElement("canvas");
-        var lg = window.CaiLiquid.mount(tmp, { t0: 4.6, dark: isDark() }); if (!lg) return;
+        var lg = window.CaiOrb.mount(tmp, { variant: "glass", radius: .6, still: true, t0: 4.6 }); if (!lg) return;
         lg.drawFixed(160);
         k.getContext("2d").drawImage(tmp, 32, 32, 96, 96, 0, 0, 96, 96);
         html.style.setProperty("--cai-orb-img", 'url("' + k.toDataURL("image/png") + '")');
@@ -684,7 +683,6 @@
       } catch (e) { /* keep the image */ }
     }
     still();
-    new MutationObserver(function () { L.theme(isDark()); still(); }).observe(html, { attributes: true, attributeFilter: ["data-theme"] });
     var seen = false;
     function sync() { if (seen && !document.hidden && !reduce) L.start(); else L.stop(); }
     if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { seen = es[0].isIntersecting; sync(); }).observe(c); else seen = true;
