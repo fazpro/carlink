@@ -47,6 +47,39 @@
   function el(html) { var t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstChild; }
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+
+  /* ---------- Orb (glass sphere with swirling light, Figma "AI orb") ---------- */
+  var orbN = 0;
+  function orbSVG(rich) {
+    var k = "o" + (++orbN);
+    return '<svg viewBox="0 0 100 100" aria-hidden="true"><defs>' +
+      '<radialGradient id="' + k + 'b" cx="40%" cy="32%" r="72%"><stop offset="0" stop-color="#b9dcff"/><stop offset=".3" stop-color="#4b8fff"/><stop offset=".68" stop-color="#1450f0"/><stop offset="1" stop-color="#0a238f"/></radialGradient>' +
+      '<linearGradient id="' + k + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3e6"/><stop offset=".35" stop-color="#7df9ff"/><stop offset=".65" stop-color="#ffd27a"/><stop offset="1" stop-color="#a68bff"/></linearGradient>' +
+      '<clipPath id="' + k + 'c"><circle cx="50" cy="50" r="48"/></clipPath>' +
+      '<filter id="' + k + 'f" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter>' +
+      '<filter id="' + k + 'g" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".7"/></filter></defs>' +
+      '<circle cx="50" cy="50" r="48" fill="url(#' + k + 'b)"/>' +
+      '<g clip-path="url(#' + k + 'c)">' +
+        '<g class="o-swirl" style="mix-blend-mode:screen">' +
+          '<path d="M-2 66C20 30 54 86 102 34" stroke="#8fdcff" stroke-width="18" fill="none" opacity=".55" filter="url(#' + k + 'f)"/>' +
+          '<path d="M0 62C24 34 54 80 100 38" stroke="#e8fbff" stroke-width="6" fill="none" opacity=".9" filter="url(#' + k + 'f)"/>' +
+          '<path d="M2 60C26 36 54 76 98 40" stroke="#fff" stroke-width="2.2" fill="none" filter="url(#' + k + 'g)"/>' +
+          '<path d="M8 80C32 50 66 92 96 58" stroke="#5ff2ff" stroke-width="7" fill="none" opacity=".55" filter="url(#' + k + 'f)"/>' +
+        '</g>' +
+        (rich ? '<g class="o-swirl2" style="mix-blend-mode:screen"><path d="M4 30C30 56 62 8 98 28" stroke="#cdeeff" stroke-width="5" fill="none" opacity=".75" filter="url(#' + k + 'f)"/>' +
+          '<path d="M6 31C31 54 62 11 96 29" stroke="#fff" stroke-width="1.6" fill="none" filter="url(#' + k + 'g)"/>' +
+          '<path d="M16 88C40 64 70 70 90 84" stroke="#ff9ee0" stroke-width="5" fill="none" opacity=".5" filter="url(#' + k + 'f)"/></g>' : '') +
+        '<ellipse cx="34" cy="24" rx="16" ry="8" transform="rotate(-24 34 24)" fill="#fff" opacity=".55" filter="url(#' + k + 'f)"/>' +
+        '<g class="o-rim"><circle cx="50" cy="50" r="46.5" fill="none" stroke="url(#' + k + 'r)" stroke-width="3" opacity=".85" filter="url(#' + k + 'g)"/></g>' +
+      '</g>' +
+      (rich ? '<circle class="o-spark" cx="70" cy="30" r="1.6" fill="#fff"/><circle class="o-spark" cx="28" cy="62" r="1.2" fill="#fff"/><circle class="o-spark" cx="62" cy="72" r="1.1" fill="#e6fbff"/><circle class="o-spark" cx="44" cy="40" r=".9" fill="#fff"/>' : '') +
+      "</svg>";
+  }
+  function fillOrbs(scope) {
+    $$(".cai-orb:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = orbSVG(true); });
+    $$(".cai-av:not([data-o])", scope).forEach(function (n) { n.setAttribute("data-o", ""); n.innerHTML = orbSVG(false); });
+  }
+
   /* ---------- Data (from the Carlink prototype / Figma) ---------- */
   var ORDERS = [
     ["1011-CDA", "Barbara Davis", "2017 Mercedes-Benz C300", "Las Vegas, NV", "Atlanta, GA"],
@@ -139,7 +172,7 @@
   function short(t) { return t.title.split(" · ")[0]; }
 
   /* ---------- DOM refs ---------- */
-  hydrate(root);
+  hydrate(root); fillOrbs(root);
   var main = $("[data-cai-main]"), thread = $("[data-cai-thread]"), scroll = $("[data-cai-scroll]");
   var tabsEl = $("[data-cai-tabs]"), pill = $("[data-cai-pill]"), titleEl = $("[data-cai-title]");
   var recentEl = $("[data-cai-recent]"), searchEl = $("[data-cai-search]");
@@ -202,9 +235,10 @@
   function size(b) { return b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB"; }
 
   function aiShell() {
-    return el('<div class="cai-msg cai-ai"><div class="cai-ai__who"><span class="cai-av"></span>Carlink AI</div>' +
-      '<div class="cai-ai__body"><div class="cai-meta"><span data-meta-ico>' + svg("bulb") + '</span><span class="cai-meta__txt" data-meta-txt></span>' + svg("chev").replace("<svg", '<svg class="cai-meta__chev"') + "</div></div></div>");
+    return withOrb(el('<div class="cai-msg cai-ai"><div class="cai-ai__who"><span class="cai-av"></span>Carlink AI</div>' +
+      '<div class="cai-ai__body"><div class="cai-meta"><span data-meta-ico>' + svg("bulb") + '</span><span class="cai-meta__txt" data-meta-txt></span>' + svg("chev").replace("<svg", '<svg class="cai-meta__chev"') + "</div></div></div>"));
   }
+  function withOrb(n) { fillOrbs(n); return n; }
   function metaText(a, secs) { return a.meta[2] || ("Reasoned for " + (secs || a.meta[1] || 1) + " sec"); }
   function chipNode(a) { return a.chip ? el('<span class="cai-chip">' + svg(a.chip[0]) + esc(a.chip[1]) + "</span>") : null; }
 
@@ -383,7 +417,7 @@
     send.setAttribute("aria-label", on ? "Stop generating" : "Send");
     updateSend();
   }
-  function updateSend() { send.classList.toggle("is-ready", !busy && (!!text.value.trim() || files.length > 0)); }
+  function updateSend() { send.classList.toggle("is-ready", !busy); }
   function autosize() { text.style.height = ""; if (text.value) { text.style.height = "auto"; text.style.height = Math.min(200, text.scrollHeight) + "px"; } updateSend(); }
   function fitHeight() { var v = root.closest("[data-view]"); if (v.hidden) return; var top = root.getBoundingClientRect().top + window.scrollY; root.style.setProperty("--cai-off", Math.round(top + (window.innerWidth > 767 ? 16 : 0)) + "px"); movePill(); }
   window.addEventListener("resize", fitHeight);
@@ -492,10 +526,12 @@
       t.innerHTML = svg("check"); setTimeout(function () { t.innerHTML = svg("copy"); }, 1400); toast("Copied"); return;
     }
     if ((t = e.target.closest("[data-cai-sms]"))) { toast("SMS sent to 3 shippers"); return; }
+    if ((t = e.target.closest("[data-cai-tmore]"))) { toolMenu(t); return; }
+    if ((t = e.target.closest("[data-cai-tool-item]"))) { toolItem(t.dataset.caiToolItem); return; }
     if ((t = e.target.closest("[data-cai-act]"))) { act(t); return; }
     if ((t = e.target.closest("[data-cai-menu-item]"))) { menuItem(t); return; }
   });
-  document.addEventListener("click", function (e) { if (!e.target.closest(".cai-menu, [data-cai-act='more']")) $$(".cai-menu", root).forEach(function (m) { m.remove(); }); });
+  document.addEventListener("click", function (e) { if (!e.target.closest(".cai-menu, [data-cai-act='more'], [data-cai-tmore]")) $$(".cai-menu", root).forEach(function (m) { m.remove(); }); });
 
   function act(b) {
     var kind = b.dataset.caiAct, msg = b.closest(".cai-ai"), acts = b.parentNode;
@@ -518,6 +554,20 @@
       var menu = el('<div class="cai-menu" role="menu"><button type="button" role="menuitem" data-cai-menu-item="reply">' + svg("reply") + 'Reply</button><button type="button" role="menuitem" class="is-danger" data-cai-menu-item="delete">' + svg("trash") + "Delete</button></div>");
       acts.appendChild(menu); menu.style.left = b.offsetLeft + "px";
     }
+  }
+  function toolMenu(b) {
+    var open = $(".cai-menu", b.parentNode); $$(".cai-menu", root).forEach(function (x) { x.remove(); }); if (open) return;
+    var items = [["pen", "New chat", "new"], ["share", "Copy chat link", "link"]];
+    if (current) items.push(["trash", "Delete chat", "delete"]);
+    b.parentNode.appendChild(el('<div class="cai-menu" role="menu">' + items.map(function (it) {
+      return '<button type="button" role="menuitem"' + (it[2] === "delete" ? ' class="is-danger"' : "") + ' data-cai-tool-item="' + it[2] + '">' + svg(it[0]) + it[1] + "</button>";
+    }).join("") + "</div>"));
+  }
+  function toolItem(kind) {
+    $$(".cai-menu", root).forEach(function (x) { x.remove(); });
+    if (kind === "new") go(null);
+    else if (kind === "link") { copyText(location.href); toast("Link copied"); }
+    else if (kind === "delete" && current) { var id = current; threads = threads.filter(function (x) { return x.id !== id; }); tabs = tabs.filter(function (x) { return x !== id; }); go(null); toast("Chat deleted"); }
   }
   function menuItem(b) {
     var msg = b.closest(".cai-ai"), m = msg && msg._msg; b.closest(".cai-menu").remove();

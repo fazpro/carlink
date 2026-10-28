@@ -10,8 +10,10 @@ css = (SRC / "ai.css").read_text(encoding="utf-8")
 view = (SRC / "ai.html").read_text(encoding="utf-8")
 js = (SRC / "ai.js").read_text(encoding="utf-8")
 
-SPARK = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.4 0 .7.3.8.7l1.1 4.2a3 3 0 0 0 2.1 2.1l4.2 1.1a.8.8 0 0 1 0 1.6l-4.2 1.1a3 3 0 0 0-2.1 2.1l-1.1 4.2a.8.8 0 0 1-1.6 0l-1.1-4.2a3 3 0 0 0-2.1-2.1l-4.2-1.1a.8.8 0 0 1 0-1.6l4.2-1.1a3 3 0 0 0 2.1-2.1l1.1-4.2c.1-.4.4-.7.8-.7Z"/>'
-         '<path d="M19 2.5c.2 0 .4.1.4.3l.3 1.1c.1.3.3.5.6.6l1.1.3a.4.4 0 0 1 0 .8l-1.1.3a.9.9 0 0 0-.6.6l-.3 1.1a.4.4 0 0 1-.8 0l-.3-1.1a.9.9 0 0 0-.6-.6l-1.1-.3a.4.4 0 0 1 0-.8l1.1-.3c.3-.1.5-.3.6-.6l.3-1.1c0-.2.2-.3.4-.3Z" opacity=".75"/></svg>')
+SPARK = ('<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">'
+         '<path d="M6.5 2.2c.15 0 .27.1.31.24l.62 2.26a2.6 2.6 0 0 0 1.85 1.85l2.26.62a.32.32 0 0 1 0 .62l-2.26.62a2.6 2.6 0 0 0-1.85 1.85l-.62 2.26a.32.32 0 0 1-.62 0l-.62-2.26a2.6 2.6 0 0 0-1.85-1.85l-2.26-.62a.32.32 0 0 1 0-.62l2.26-.62a2.6 2.6 0 0 0 1.85-1.85l.62-2.26c.04-.14.16-.24.31-.24Z"/>'
+         '<path class="s2" d="M12.2 1.4c.07 0 .13.05.15.12l.24.86c.08.3.32.53.62.62l.86.24a.16.16 0 0 1 0 .3l-.86.24c-.3.09-.54.32-.62.62l-.24.86a.16.16 0 0 1-.3 0l-.24-.86a.9.9 0 0 0-.62-.62l-.86-.24a.16.16 0 0 1 0-.3l.86-.24c.3-.09.53-.32.62-.62l.24-.86c.02-.07.08-.12.15-.12Z"/>'
+         '<circle class="s3" cx="12.6" cy="12.4" r="1.1"/></svg>')
 ASK = ('<button class="cai-ask" type="button" title="Ask Carlink AI (⌘J)" aria-label="Ask AI" data-cai-go>'
        '<span class="cai-ask__ico">' + SPARK + '</span><span class="cai-ask__lbl">Ask AI</span></button>')
 ROUTE = '<script>window.CarlinkRoutes=window.CarlinkRoutes||[];window.CarlinkRoutes.push({"re":"^ai(?:/([a-z0-9-]+))?$","view":"ai","title":"Carlink AI","section":"ai"});</script>'
