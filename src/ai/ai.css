@@ -649,3 +649,9 @@ html[data-theme="dark"] .cai-orb { box-shadow: inset 0 -12px 22px rgba(38,96,255
   .cai-fab:active { transform: scale(.97); }
   html.m-bill-on .cai-fab { bottom: calc(200px + 13px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* ---------- Liquid sphere (ref: «Liquid AI sphere») ----------
+   WebGL canvas on the hero orb; the image layers step aside. */
+.cai-orb.is-liquid { background: none; filter: drop-shadow(0 16px 22px rgba(12,24,90,.28)); }
+.cai-orb.is-liquid::before, .cai-orb.is-liquid::after { display: none; }
+.cai-orb > canvas.cai-liquid { display: block; position: absolute; left: -33.333%; top: -33.333%; width: 166.667%; height: 166.667%; pointer-events: none; }

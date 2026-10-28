@@ -8,7 +8,7 @@ doc = html_path.read_text(encoding="utf-8")
 
 css = (SRC / "ai.css").read_text(encoding="utf-8")
 view = (SRC / "ai.html").read_text(encoding="utf-8")
-js = (SRC / "ai.js").read_text(encoding="utf-8")
+js = (SRC / "liquid.js").read_text(encoding="utf-8") + "\n" + (SRC / "ai.js").read_text(encoding="utf-8")
 
 SPARK = ('<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">'
          '<path d="M6.5 2.2c.15 0 .27.1.31.24l.62 2.26a2.6 2.6 0 0 0 1.85 1.85l2.26.62a.32.32 0 0 1 0 .62l-2.26.62a2.6 2.6 0 0 0-1.85 1.85l-.62 2.26a.32.32 0 0 1-.62 0l-.62-2.26a2.6 2.6 0 0 0-1.85-1.85l-2.26-.62a.32.32 0 0 1 0-.62l2.26-.62a2.6 2.6 0 0 0 1.85-1.85l.62-2.26c.04-.14.16-.24.31-.24Z"/>'

@@ -661,6 +661,35 @@
   }
   function syncRouteClass(view) { document.documentElement.classList.toggle("cai-route", view === "ai"); }
 
+  /* ---------- Liquid sphere (WebGL) on the hero orb; avatars get a still of it ---------- */
+  (function liquid() {
+    var o = $("[data-cai-orb]"); if (!o || !window.CaiLiquid) return;
+    var c = document.createElement("canvas"); c.className = "cai-liquid"; c.setAttribute("aria-hidden", "true");
+    o.appendChild(c);
+    var L = null; try { L = window.CaiLiquid.mount(c); } catch (e) { L = null; }
+    if (!L) { c.remove(); return; }
+    o.classList.add("is-liquid");
+    // still frame for the small avatars (crop the disc out of the larger canvas)
+    function still() {
+      try {
+        var k = document.createElement("canvas"); k.width = k.height = 96;
+        var tmp = document.createElement("canvas"); tmp.width = tmp.height = 160;
+        var lg = window.CaiLiquid.mount(tmp, { t0: 4.6 }); if (!lg) return;
+        tmp.style.width = tmp.style.height = "160px"; lg.drawFixed(160);
+        k.getContext("2d").drawImage(tmp, 32, 32, 96, 96, 0, 0, 96, 96);
+        document.documentElement.style.setProperty("--cai-orb-img", 'url("' + k.toDataURL("image/png") + '")');
+        lg.dispose();
+      } catch (e) { /* keep the image */ }
+    }
+    still();
+    var seen = false;
+    function sync() { if (seen && !document.hidden && !reduce) L.start(); else L.stop(); }
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { seen = es[0].isIntersecting; sync(); }).observe(c); else seen = true;
+    document.addEventListener("visibilitychange", sync);
+    new MutationObserver(function () { L.busy(o.classList.contains("is-busy")); }).observe(o, { attributes: true, attributeFilter: ["class"] });
+    requestAnimationFrame(function () { L.draw(); sync(); });
+  })();
+
   document.addEventListener("carlink:route", function (e) {
     var r = e.detail || {};
     syncRouteClass(r.view); if (r.view !== "ai") { closeOpts(); root.classList.remove("is-chats"); }
