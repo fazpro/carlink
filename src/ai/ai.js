@@ -661,21 +661,21 @@
   }
   function syncRouteClass(view) { document.documentElement.classList.toggle("cai-route", view === "ai"); }
 
-  /* ---------- Sphere (WebGL, variant J «Siri») on the hero orb; avatars get a still of it ---------- */
+  /* ---------- Sphere (WebGL, variant C «Shisha») on the hero orb; avatars get a still of it ---------- */
   (function liquid() {
     var o = $("[data-cai-orb]"); if (!o || !window.CaiOrb) return;
     var html = document.documentElement;
     function isDark() { return html.getAttribute("data-theme") === "dark"; }
     var c = document.createElement("canvas"); c.className = "cai-liquid"; c.setAttribute("aria-hidden", "true");
     o.appendChild(c);
-    var L = null; try { L = window.CaiOrb.mount(c, { variant: "siri", radius: .6 }); } catch (e) { L = null; }
+    var L = null; try { L = window.CaiOrb.mount(c, { variant: "glass", radius: .6 }); } catch (e) { L = null; }
     if (!L) { c.remove(); return; }
     o.classList.add("is-liquid");
     function still() {
       try {
         var k = document.createElement("canvas"); k.width = k.height = 96;
         var tmp = document.createElement("canvas");
-        var lg = window.CaiOrb.mount(tmp, { variant: "siri", radius: .6, still: true, t0: 4.6 }); if (!lg) return;
+        var lg = window.CaiOrb.mount(tmp, { variant: "glass", radius: .6, still: true, t0: 4.6 }); if (!lg) return;
         lg.drawFixed(160);
         k.getContext("2d").drawImage(tmp, 32, 32, 96, 96, 0, 0, 96, 96);
         html.style.setProperty("--cai-orb-img", 'url("' + k.toDataURL("image/png") + '")');
